@@ -20,7 +20,7 @@ export const StickyCTA: React.FC<StickyCTAProps> = ({ customName }) => {
           <div>
             <div className="text-xs uppercase tracking-wider font-cinzel font-bold text-[#d4af37] flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
-              Limited Merch Pre-Order
+              Limited Merch Order
             </div>
             <p className="text-xs text-[#f4eae1]/80 font-sans">
               {customName.trim()

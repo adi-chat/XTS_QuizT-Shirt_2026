@@ -158,7 +158,7 @@ export const TShirtCustomizer: React.FC<TShirtCustomizerProps> = ({
             </div>
             <div className="flex items-center gap-3 text-sm text-[#f4eae1]">
               <CheckCircle2 className="w-5 h-5 text-[#d4af37] shrink-0" />
-              <span><strong>Custom Name Printing Available</strong> included on pre-order</span>
+              <span><strong>Custom Name Printing Available</strong> included on official order form</span>
             </div>
           </div>
         </div>

@@ -870,7 +870,7 @@ export default function App() {
                     rel="noopener noreferrer"
                     className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#7a1c1c] to-[#942626] hover:from-[#942626] hover:to-[#a82d2d] border border-[#d4af37]/70 text-[#ffd700] font-cinzel font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 shadow-md"
                   >
-                    <span>Pre-Order Form ↗</span>
+                    <span>Order T-Shirt ↗</span>
                   </a>
                 </div>
               </div>
