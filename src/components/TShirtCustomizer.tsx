@@ -87,7 +87,7 @@ export const TShirtCustomizer: React.FC<TShirtCustomizerProps> = ({
             {view === 'back' && (
               <div
                 className="absolute -translate-x-1/2 text-center pointer-events-none select-none z-10 w-[75%]"
-                style={{ top: '72.5%', left: '47.5%' }}
+                style={{ top: 'calc(72.5% - 12px)', left: '47.5%' }}
               >
                 <span
                   className="font-cinzel font-bold text-sm sm:text-base lg:text-lg tracking-[0.05em] text-[#e2c974] uppercase block"

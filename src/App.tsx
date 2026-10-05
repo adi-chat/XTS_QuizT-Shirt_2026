@@ -25,6 +25,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { ORDER_FORM_URL } from './constants';
+import { preloadCriticalAssets, preloadImage } from './utils/preloadAssets';
 
 const HAT_DELIBERATION_PHRASES = [
   "Hmm... fascinating... I sense immense stage presence...",
@@ -110,6 +111,11 @@ export default function App() {
       clearTimeout(timeoutId);
     };
   }, [screen, currentQIndex]);
+
+  // Preload all critical assets (8 hat pictures, logo, polo shirts, fonts, character portraits)
+  useEffect(() => {
+    preloadCriticalAssets();
+  }, []);
 
   const handleToggleSound = () => {
     const muted = soundManager.toggleMute();
@@ -265,7 +271,15 @@ export default function App() {
       setDeliberationText(HAT_DELIBERATION_PHRASES[phraseIdx]);
     }, 700);
 
-    setTimeout(() => {
+    // Transition Gate: Ensure winning character portrait and fonts are cached in memory before result screen
+    const charImgSrc = resolvedChar.image || (resolvedChar as any).imageSrc;
+    const gatePromise = Promise.all([
+      charImgSrc ? preloadImage(charImgSrc) : Promise.resolve(),
+      typeof document !== 'undefined' && document.fonts ? document.fonts.ready : Promise.resolve(),
+      new Promise(resolve => setTimeout(resolve, 2200)), // minimum theatrical deliberation time
+    ]);
+
+    gatePromise.then(() => {
       clearInterval(interval);
       setScreen('result');
       setHatState('verdict');
@@ -278,7 +292,7 @@ export default function App() {
         origin: { y: 0.6 },
         colors: ['#d4af37', '#7a1c1c', '#ffffff', '#f5c842'],
       });
-    }, 3000);
+    });
   };
 
   const handleRestart = () => {

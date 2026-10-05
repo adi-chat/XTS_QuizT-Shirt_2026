@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import type { CharacterProfile, CharacterResult } from '../types/quiz';
-import { ORDER_FORM_URL } from '../constants';
+import { ORDER_FORM_URL, QUIZ_URL, SOCIETY_INSTAGRAM_HANDLE } from '../constants';
 import { Download, Share2, X, Sparkles, Check, Smartphone } from 'lucide-react';
 
 interface StoryShareModalProps {
@@ -99,6 +99,7 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       };
 
       // Helper to wrap text with strict width containment and optional max-lines
+      // Helper to wrap text with strict width containment and optional max-lines
       const drawWrappedText = (
         text: string,
         x: number,
@@ -110,6 +111,7 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ): number => {
         ctx.save();
         ctx.textAlign = align;
+        ctx.letterSpacing = '0px'; // Crucial: Prevent letterSpacing from stretching body text
         const words = text.split(' ');
         let line = '';
         let currentY = startY;
@@ -117,23 +119,32 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
 
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
+          ctx.letterSpacing = '0px';
           const metrics = ctx.measureText(testLine);
           if (metrics.width > maxWidth && n > 0) {
             lineCount++;
             if (lineCount >= maxLines) {
+              ctx.letterSpacing = '0px';
               ctx.fillText(line.trim() + '...', x, currentY);
+              ctx.letterSpacing = '0px';
               ctx.restore();
+              ctx.letterSpacing = '0px';
               return currentY;
             }
+            ctx.letterSpacing = '0px';
             ctx.fillText(line.trim(), x, currentY);
+            ctx.letterSpacing = '0px';
             line = words[n] + ' ';
             currentY += lineHeight;
           } else {
             line = testLine;
           }
         }
+        ctx.letterSpacing = '0px';
         ctx.fillText(line.trim(), x, currentY);
+        ctx.letterSpacing = '0px';
         ctx.restore();
+        ctx.letterSpacing = '0px';
         return currentY;
       };
 
@@ -225,6 +236,7 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ctx.font = 'bold 30px "Cinzel", Georgia, serif';
       ctx.letterSpacing = '6px';
       ctx.fillText('XAVERIAN THEATRICAL SOCIETY', width / 2, 170);
+      ctx.letterSpacing = '0px';
 
       // Elegant Center Divider
       ctx.strokeStyle = '#d4af37';
@@ -281,25 +293,29 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ctx.font = 'bold 21px "Cinzel", serif';
       ctx.letterSpacing = '3px';
       ctx.fillText('THE SORTING HAT HAS SPOKEN', decreeTextX, plaqueY + 48);
+      ctx.letterSpacing = '0px';
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 35px "Cinzel", Georgia, serif';
       ctx.letterSpacing = '1px';
       ctx.fillText('"I NEED THE XTS T-SHIRT!"', decreeTextX, plaqueY + 95);
+      ctx.letterSpacing = '0px';
 
       ctx.fillStyle = '#fce8d5';
-      ctx.font = 'italic 500 17px "Playfair Display", serif';
+      ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
       ctx.letterSpacing = '1px';
       ctx.fillText('Official Society Theatrical Verdict', decreeTextX, plaqueY + 130);
+      ctx.letterSpacing = '0px';
       ctx.restore();
 
-      // 5. The Grand Alter Ego Stage Showcase (CENTERPIECE - Full of rich detail, Zero Squish, Zero Overflow)
+      // 5. The Grand Alter Ego Stage Showcase (Tightened Spacing, Zero Squish, Coherent Typography)
+      const personalizedName = customName.trim() ? customName.toUpperCase() : null;
       const stageX = 60;
-      const stageY = 395;
+      const stageY = 390;
       const stageW = width - 120;
-      const stageH = 920;
+      const stageH = personalizedName ? 810 : 770;
 
-      drawRoundedRect(stageX, stageY, stageW, stageH, 26);
+      drawRoundedRect(stageX, stageY, stageW, stageH, 24);
       ctx.fillStyle = 'rgba(18, 13, 11, 0.95)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
@@ -308,8 +324,8 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
 
       // Pill: Official Theatrical Alter Ego
       const pillW = 380;
-      const pillH = 36;
-      drawRoundedRect(width / 2 - pillW / 2, stageY + 18, pillW, pillH, 18);
+      const pillH = 34;
+      drawRoundedRect(width / 2 - pillW / 2, stageY + 16, pillW, pillH, 17);
       ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
       ctx.fill();
       ctx.strokeStyle = '#d4af37';
@@ -319,16 +335,17 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffd700';
-      ctx.font = 'bold 14px "Cinzel", serif';
+      ctx.font = 'bold 13.5px "Cinzel", serif';
       ctx.letterSpacing = '3px';
-      ctx.fillText('✦ OFFICIAL THEATRICAL ALTER EGO ✦', width / 2, stageY + 41);
+      ctx.fillText('✦ OFFICIAL THEATRICAL ALTER EGO ✦', width / 2, stageY + 38);
+      ctx.letterSpacing = '0px';
       ctx.restore();
 
-      // Character Portrait Poster (Proper 400x440 portrait aspect ratio, cropped cleanly via drawImageCover!)
+      // Character Portrait Poster (400x415 portrait, cropped cleanly via drawImageCover - No Squishing!)
       const posterW = 400;
-      const posterH = 440;
+      const posterH = 415;
       const posterX = width / 2 - posterW / 2;
-      const posterY = stageY + 66;
+      const posterY = stageY + 58;
 
       if (charImg) {
         // Shadow behind poster
@@ -350,71 +367,76 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
 
         // Badge banner at bottom of poster
         ctx.fillStyle = 'rgba(12, 8, 7, 0.9)';
-        ctx.fillRect(posterX, posterY + posterH - 42, posterW, 42);
+        ctx.fillRect(posterX, posterY + posterH - 40, posterW, 40);
         ctx.strokeStyle = '#d4af37';
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(posterX, posterY + posterH - 42, posterW, 42);
+        ctx.strokeRect(posterX, posterY + posterH - 40, posterW, 40);
 
         const charBadge = ((result as any).badge || (result as any).archetype || 'THEATRICAL ALTER EGO').toUpperCase();
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 16px "Cinzel", serif';
+        ctx.font = 'bold 15px "Cinzel", serif';
         ctx.letterSpacing = '3px';
-        ctx.fillText(charBadge, width / 2, posterY + posterH - 15);
+        ctx.fillText(charBadge, width / 2, posterY + posterH - 14);
+        ctx.letterSpacing = '0px';
         ctx.restore();
       }
 
-      // Character Name (Auto-scales font so long names like DEADPOOL (WADE WILSON) fit comfortably!)
+      // Character Name (Auto-scales font so long names like DEADPOOL fit comfortably)
       const charName = (result.name || (result as any).character || 'Thespian').toUpperCase();
-      let nameFontSize = 34;
-      ctx.font = `bold ${nameFontSize}px "Cinzel", Georgia, serif`;
+      let nameFontSize = 32;
+      ctx.font = `bold ${nameFontSize}px "Cinzel", serif`;
       while (ctx.measureText(charName).width > stageW - 80 && nameFontSize > 22) {
         nameFontSize -= 2;
-        ctx.font = `bold ${nameFontSize}px "Cinzel", Georgia, serif`;
+        ctx.font = `bold ${nameFontSize}px "Cinzel", serif`;
       }
       ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffffff';
       ctx.letterSpacing = '2px';
-      ctx.fillText(charName, width / 2, stageY + 540);
+      ctx.fillText(charName, width / 2, stageY + 508);
+      ctx.letterSpacing = '0px';
       ctx.restore();
 
-      // Archetype Title (Auto-scales font if needed)
-      let titleFontSize = 21;
-      ctx.font = `italic 600 ${titleFontSize}px "Playfair Display", Georgia, serif`;
+      // Archetype Title (Clean Plus Jakarta Sans, NOT italic)
+      let titleFontSize = 20;
+      ctx.font = `600 ${titleFontSize}px "Plus Jakarta Sans", sans-serif`;
       while (ctx.measureText(`"${result.title}"`).width > stageW - 80 && titleFontSize > 15) {
         titleFontSize -= 1;
-        ctx.font = `italic 600 ${titleFontSize}px "Playfair Display", Georgia, serif`;
+        ctx.font = `600 ${titleFontSize}px "Plus Jakarta Sans", sans-serif`;
       }
       ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = (result as any).accentColor || '#ffd700';
-      ctx.letterSpacing = '1px';
-      ctx.fillText(`"${result.title}"`, width / 2, stageY + 572);
+      ctx.letterSpacing = '0.5px';
+      ctx.fillText(`"${result.title}"`, width / 2, stageY + 534);
+      ctx.letterSpacing = '0px';
       ctx.restore();
 
-      // Quote (Auto-scales or wraps cleanly, keeping it snug)
+      // Quote (Clean Plus Jakarta Sans, strict 0px letterSpacing)
       const quoteStr = `"${result.quote || (result as any).pitch || ''}"`;
-      ctx.font = 'italic 500 17px "Playfair Display", serif';
+      ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
       ctx.fillStyle = '#fce8d5';
-      const quoteEndY = drawWrappedText(quoteStr, width / 2, stageY + 602, stageW - 80, 22, 'center', 2);
+      const quoteEndY = drawWrappedText(quoteStr, width / 2, stageY + 558, stageW - 80, 22, 'center', 2);
 
-      // Characteristics / Vibe text (Wrapped cleanly within 840px, max 2 lines)
+      // Characteristics / Vibe text (Clean Plus Jakarta Sans, strict 0px letterSpacing)
       const charVibe = (result as any).vibe || (result as any).description || '';
+      let vibeEndY = quoteEndY;
       if (charVibe) {
-        ctx.fillStyle = 'rgba(252, 232, 213, 0.85)';
-        ctx.font = '400 15px "Plus Jakarta Sans", sans-serif';
-        drawWrappedText(charVibe, width / 2, quoteEndY + 28, stageW - 80, 21, 'center', 2);
+        ctx.fillStyle = 'rgba(252, 232, 213, 0.88)';
+        ctx.font = '400 14px "Plus Jakarta Sans", sans-serif';
+        vibeEndY = drawWrappedText(charVibe, width / 2, quoteEndY + 22, stageW - 80, 20, 'center', 2);
       }
 
-      // Backstage Tell & Rehearsal Habit Callout Box (Left-bordered aesthetic, exactly matching Screenshot 2!)
+      // Backstage Tell & Rehearsal Habit Callout Box (Safe 26px clearance below description to prevent collision!)
       const tellText = (result as any).stageTell || (result as any).backstageHabit || '';
+      let tellEndY = vibeEndY;
       if (tellText) {
         const tellBoxW = stageW - 80; // 880
-        const tellBoxH = 80;
+        const tellBoxH = 74;
         const tellBoxX = width / 2 - tellBoxW / 2; // 100
-        const tellBoxY = stageY + 695;
+        const tellBoxY = vibeEndY + 26;
 
         drawRoundedRect(tellBoxX, tellBoxY, tellBoxW, tellBoxH, 12);
         ctx.fillStyle = 'rgba(10, 7, 6, 0.88)';
@@ -431,40 +453,42 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
         ctx.save();
         ctx.textAlign = 'left';
         ctx.fillStyle = '#d4af37';
-        ctx.font = 'bold 11px "Cinzel", serif';
+        ctx.font = 'bold 10.5px "Cinzel", serif';
         ctx.letterSpacing = '2px';
-        ctx.fillText('BACKSTAGE TELL & REHEARSAL HABIT', tellBoxX + 20, tellBoxY + 24);
+        ctx.fillText('BACKSTAGE TELL & REHEARSAL HABIT', tellBoxX + 20, tellBoxY + 22);
+        ctx.letterSpacing = '0px';
         ctx.restore();
 
-        // Habit quote: Left-aligned starting at tellBoxX + 20, maxWidth: tellBoxW - 40 (never overflows!)
+        // Habit quote (Clean Plus Jakarta Sans, strict 0px letterSpacing)
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'italic 15px "Playfair Display", serif';
-        drawWrappedText(`"${tellText}"`, tellBoxX + 20, tellBoxY + 48, tellBoxW - 40, 21, 'left', 2);
+        ctx.font = '500 14px "Plus Jakarta Sans", sans-serif';
+        drawWrappedText(`"${tellText}"`, tellBoxX + 20, tellBoxY + 44, tellBoxW - 40, 18, 'left', 2);
+        tellEndY = tellBoxY + tellBoxH;
       }
 
-      // Hashtags (Auto-fitting pills centered below the box)
+      // Hashtags (Positioned cleanly below the box)
       const tags: string[] = (result as any).tags || ['#XTS2026', '#TheatricalAlterEgo'];
+      const tagY = tellEndY + 12;
+      const tagH = 26;
+
       if (tags.length > 0) {
-        let tagFontSize = 13;
-        ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
-        let tagWidths = tags.map(t => ctx.measureText(t).width + 28);
+        let tagFontSize = 12;
+        ctx.font = `bold ${tagFontSize}px "Cinzel", serif`;
+        let tagWidths = tags.map(t => ctx.measureText(t).width + 26);
         let totalTagsWidth = tagWidths.reduce((a, b) => a + b, 0) + (tags.length - 1) * 10;
 
-        // If tags are too wide, reduce font size slightly
         if (totalTagsWidth > stageW - 60) {
           tagFontSize = 11;
-          ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
-          tagWidths = tags.map(t => ctx.measureText(t).width + 22);
+          ctx.font = `bold ${tagFontSize}px "Cinzel", serif`;
+          tagWidths = tags.map(t => ctx.measureText(t).width + 20);
           totalTagsWidth = tagWidths.reduce((a, b) => a + b, 0) + (tags.length - 1) * 8;
         }
 
         let startX = width / 2 - totalTagsWidth / 2;
-        const tagY = stageY + 795;
-        const tagH = 30;
 
         tags.forEach((tag, idx) => {
           const tW = tagWidths[idx];
-          drawRoundedRect(startX, tagY, tW, tagH, 15);
+          drawRoundedRect(startX, tagY, tW, tagH, 13);
           ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
           ctx.fill();
           ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
@@ -474,20 +498,19 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
           ctx.save();
           ctx.textAlign = 'center';
           ctx.fillStyle = '#ffd700';
-          ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
-          ctx.fillText(tag, startX + tW / 2, tagY + 20);
+          ctx.font = `bold ${tagFontSize}px "Cinzel", serif`;
+          ctx.fillText(tag, startX + tW / 2, tagY + 18);
           ctx.restore();
           startX += tW + 10;
         });
       }
 
       // Personalized Name Badge if provided
-      const personalizedName = customName.trim() ? customName.toUpperCase() : null;
       if (personalizedName) {
         const namePillW = 460;
-        const namePillH = 36;
-        const namePillY = stageY + 840;
-        drawRoundedRect(width / 2 - namePillW / 2, namePillY, namePillW, namePillH, 18);
+        const namePillH = 32;
+        const namePillY = tagY + tagH + 10;
+        drawRoundedRect(width / 2 - namePillW / 2, namePillY, namePillW, namePillH, 16);
         ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
         ctx.fill();
         ctx.strokeStyle = '#d4af37';
@@ -497,81 +520,279 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
         ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 15px "Cinzel", serif';
+        ctx.font = 'bold 14px "Cinzel", serif';
         ctx.letterSpacing = '2px';
-        ctx.fillText(`🎭 NAME ON T-SHIRT: ${personalizedName}`, width / 2, namePillY + 23);
+        ctx.fillText(`🎭 NAME ON T-SHIRT: ${personalizedName}`, width / 2, namePillY + 21);
+        ctx.letterSpacing = '0px';
         ctx.restore();
       }
 
       // 6. Society Merch Highlights Bar
-      const merchY = 1335;
+      const merchY = stageY + stageH + 14;
       const merchW = width - 120;
-      const merchH = 90;
-      drawRoundedRect(60, merchY, merchW, merchH, 18);
+      const merchH = 72;
+      drawRoundedRect(60, merchY, merchW, merchH, 16);
       ctx.fillStyle = 'rgba(244, 234, 225, 0.04)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
+      ctx.save();
       ctx.textAlign = 'center';
-      ctx.font = 'bold 18px "Cinzel", sans-serif';
+      ctx.font = 'bold 17px "Cinzel", serif';
       ctx.fillStyle = '#fce8d5';
       ctx.letterSpacing = '1.5px';
-      ctx.fillText('✨ 100% BREATHABLE COTTON  •  VINTAGE EMBOSSED BACK PRINT ✨', width / 2, merchY + 40);
+      ctx.fillText('✨ 100% BREATHABLE COTTON  •  VINTAGE EMBOSSED BACK PRINT ✨', width / 2, merchY + 29);
+      ctx.letterSpacing = '0px';
 
-      ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '600 15px "Plus Jakarta Sans", sans-serif';
       ctx.fillStyle = '#ffd700';
       ctx.letterSpacing = '1px';
-      ctx.fillText('🎭 Custom Name Printing Available on Official Pre-Order', width / 2, merchY + 72);
+      ctx.fillText('🎭 Custom Name Printing Available on Official Order Form', width / 2, merchY + 54);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
 
-      // 7. QR Code Section (Bigger, High Contrast, Generated from ORDER_FORM_URL!)
-      const qrY = 1430;
-      const qrCardSize = 250;
-      const qrCardX = width / 2 - qrCardSize / 2;
+      // 7. Dual QR Code Section: Left = Sorting Hat Quiz, Right = Official T-Shirt Order Form
+      const dualQrY = merchY + merchH + 14;
+      const cardW = 465;
+      const leftCardX = 60;
+      const rightCardX = 555;
+      const leftCenterX = leftCardX + cardW / 2;
+      const rightCenterX = rightCardX + cardW / 2;
+
+      let quizQrImg: HTMLImageElement | null = null;
+      let formQrImg: HTMLImageElement | null = null;
 
       try {
-        const qrDataUrl = await QRCode.toDataURL(ORDER_FORM_URL, {
-          width: 250,
-          margin: 1,
-          color: {
-            dark: '#120f0e',
-            light: '#ffffff',
-          },
-        });
+        const [quizQrDataUrl, formQrDataUrl] = await Promise.all([
+          QRCode.toDataURL(QUIZ_URL, {
+            width: 320,
+            margin: 1,
+            color: {
+              dark: '#120f0e',
+              light: '#ffffff',
+            },
+          }),
+          QRCode.toDataURL(ORDER_FORM_URL, {
+            width: 320,
+            margin: 1,
+            color: {
+              dark: '#120f0e',
+              light: '#ffffff',
+            },
+          }),
+        ]);
 
-        const qrImg = new Image();
-        qrImg.src = qrDataUrl;
-        await new Promise(resolve => {
-          qrImg.onload = resolve;
-        });
-
-        // Crisp white card for QR
-        drawRoundedRect(qrCardX, qrY, qrCardSize, qrCardSize, 18);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#d4af37';
-        ctx.lineWidth = 3.5;
-        ctx.stroke();
-
-        ctx.drawImage(qrImg, qrCardX + 10, qrY + 10, qrCardSize - 20, qrCardSize - 20);
-      } catch {
-        // Fallback
+        [quizQrImg, formQrImg] = await Promise.all([
+          loadImage(quizQrDataUrl),
+          loadImage(formQrDataUrl),
+        ]);
+      } catch (err) {
+        console.error('Failed to generate dual QR codes', err);
       }
 
-      // QR Label
+      // Shared card metrics to guarantee perfect alignment & complete space utilization (290px QR box)
+      const qrBoxSize = 290;
+      const qrBoxY = dualQrY + 54;
+      const ctaY = qrBoxY + qrBoxSize + 34;
+      const subY = ctaY + 26;
+      const plaqueBoxW = cardW - 32; // 433
+      const plaqueBoxH = 68;
+      const plaqueBoxY = subY + 16;
+      const dualQrH = (plaqueBoxY + plaqueBoxH + 22) - dualQrY; // Fits snugly with 22px bottom padding!
+
+      // --- LEFT HALF: SORTING HAT QUIZ ---
+      drawRoundedRect(leftCardX, dualQrY, cardW, dualQrH, 20);
+      ctx.fillStyle = 'rgba(18, 13, 11, 0.94)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      drawRoundedRect(leftCardX + 6, dualQrY + 6, cardW - 12, dualQrH - 12, 15);
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Left Header Pill
+      const qrPillW = 310;
+      const qrPillH = 30;
+      drawRoundedRect(leftCenterX - qrPillW / 2, dualQrY + 14, qrPillW, qrPillH, 15);
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
+      ctx.fill();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 12.5px "Cinzel", serif';
+      ctx.letterSpacing = '2px';
+      ctx.fillText('✦ STEP 1: PLAY THE QUIZ ✦', leftCenterX, dualQrY + 34);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
+
+      // Left White QR Box (Expanded 290x290 with crisp 266x266 QR)
+      const leftQrBoxX = leftCenterX - qrBoxSize / 2;
+      drawRoundedRect(leftQrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 18);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      if (quizQrImg) {
+        ctx.drawImage(quizQrImg, leftQrBoxX + 12, qrBoxY + 12, qrBoxSize - 24, qrBoxSize - 24);
+      }
+
+      // Left Action Callout (Bold, Prominent Cinzel)
+      ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffd700';
       ctx.font = 'bold 22px "Cinzel", serif';
-      ctx.letterSpacing = '2.5px';
-      ctx.fillText('SCAN TO CLAIM YOUR OFFICIAL XTS T-SHIRT', width / 2, qrY + 295);
+      ctx.letterSpacing = '2px';
+      ctx.fillText('SCAN TO PLAY QUIZ', leftCenterX, ctaY);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
+
+      // Left Subtitle (Clean Plus Jakarta Sans, NOT italic)
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '0px';
+      ctx.fillStyle = '#fce8d5';
+      ctx.font = '600 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Find Your Theatrical Alter Ego', leftCenterX, subY);
+      ctx.restore();
+
+      // Left Coherent Plaque Box (Fills the lower card completely, zero dead space!)
+      const leftPlaqueX = leftCenterX - plaqueBoxW / 2;
+      drawRoundedRect(leftPlaqueX, plaqueBoxY, plaqueBoxW, plaqueBoxH, 12);
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.12)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '0px';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14.5px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('xts-sortinghat-quiz.vercel.app', leftCenterX, plaqueBoxY + 26);
+
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '600 13px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Let the Sorting Hat evaluate you', leftCenterX, plaqueBoxY + 49);
+      ctx.restore();
+
+      // --- RIGHT HALF: CLAIM OFFICIAL XTS T-SHIRT ---
+      drawRoundedRect(rightCardX, dualQrY, cardW, dualQrH, 20);
+      ctx.fillStyle = 'rgba(18, 13, 11, 0.94)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      drawRoundedRect(rightCardX + 6, dualQrY + 6, cardW - 12, dualQrH - 12, 15);
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Right Header Pill
+      drawRoundedRect(rightCenterX - qrPillW / 2, dualQrY + 14, qrPillW, qrPillH, 15);
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
+      ctx.fill();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 12.5px "Cinzel", serif';
+      ctx.letterSpacing = '2px';
+      ctx.fillText('✦ STEP 2: CLAIM T-SHIRT ✦', rightCenterX, dualQrY + 34);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
+
+      // Right White QR Box (Expanded 290x290 with crisp 266x266 QR)
+      const rightQrBoxX = rightCenterX - qrBoxSize / 2;
+      drawRoundedRect(rightQrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 18);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      if (formQrImg) {
+        ctx.drawImage(formQrImg, rightQrBoxX + 12, qrBoxY + 12, qrBoxSize - 24, qrBoxSize - 24);
+      }
+
+      // Right Action Callout (Bold, Prominent Cinzel)
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 22px "Cinzel", serif';
+      ctx.letterSpacing = '2px';
+      ctx.fillText('SCAN TO CLAIM T-SHIRT', rightCenterX, ctaY);
+      ctx.letterSpacing = '0px';
+      ctx.restore();
+
+      // Right Subtitle (Clean Plus Jakarta Sans, NOT italic - Zero Repetition!)
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '0px';
+      ctx.fillStyle = '#fce8d5';
+      ctx.font = '600 15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Official Society Merchandise', rightCenterX, subY);
+      ctx.restore();
+
+      // Right Coherent Plaque Box (Fills the lower card completely, zero dead space!)
+      const rightPlaqueX = rightCenterX - plaqueBoxW / 2;
+      drawRoundedRect(rightPlaqueX, plaqueBoxY, plaqueBoxW, plaqueBoxH, 12);
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.12)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '0px';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14.5px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Official T-Shirt Order Form', rightCenterX, plaqueBoxY + 26);
+
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Custom Name Printing • Limited Edition', rightCenterX, plaqueBoxY + 49);
+      ctx.restore();
+
+      // Center Divider between the two halves
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(540, dualQrY + 30);
+      ctx.lineTo(540, dualQrY + dualQrH - 30);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '16px serif';
+      ctx.fillText('✦', 540, dualQrY + dualQrH / 2 + 5);
+      ctx.restore();
 
       // 8. Footer Social Handle
       ctx.textAlign = 'center';
       ctx.fillStyle = '#d4af37';
       ctx.font = '600 20px "Plus Jakarta Sans", sans-serif';
       ctx.letterSpacing = '1.5px';
-      ctx.fillText('Tag The Xaverian Theatrical Society @xts.sxccal', width / 2, 1845);
+      const footerY = Math.round((dualQrY + dualQrH + 1872) / 2 + 6);
+      ctx.fillText(`Tag The Xaverian Theatrical Society ${SOCIETY_INSTAGRAM_HANDLE}`, width / 2, footerY);
+      ctx.letterSpacing = '0px';
 
       const url = canvas.toDataURL('image/png');
       setDataUrl(url);
