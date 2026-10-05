@@ -69,30 +69,71 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
         });
       };
 
-      // Helper to wrap centered text
-      const drawCenteredWrappedText = (
+      // Helper to draw an image with object-fit: cover (cropping instead of squishing)
+      const drawImageCover = (
+        img: HTMLImageElement,
+        x: number,
+        y: number,
+        w: number,
+        h: number
+      ) => {
+        ctx.save();
+        const naturalW = img.naturalWidth || img.width;
+        const naturalH = img.naturalHeight || img.height;
+        const imgRatio = naturalW / naturalH;
+        const targetRatio = w / h;
+        let sx = 0, sy = 0, sw = naturalW, sh = naturalH;
+
+        if (imgRatio > targetRatio) {
+          // Image is wider than container: crop sides equally
+          sw = naturalH * targetRatio;
+          sx = (naturalW - sw) / 2;
+        } else {
+          // Image is taller than container: crop top & bottom (focusing 25% from top to prioritize faces)
+          sh = naturalW / targetRatio;
+          sy = Math.max(0, (naturalH - sh) * 0.25);
+        }
+
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+        ctx.restore();
+      };
+
+      // Helper to wrap text with strict width containment and optional max-lines
+      const drawWrappedText = (
         text: string,
-        centerX: number,
+        x: number,
         startY: number,
         maxWidth: number,
-        lineHeight: number
+        lineHeight: number,
+        align: 'center' | 'left' = 'center',
+        maxLines: number = 4
       ): number => {
+        ctx.save();
+        ctx.textAlign = align;
         const words = text.split(' ');
         let line = '';
         let currentY = startY;
+        let lineCount = 0;
 
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
           const metrics = ctx.measureText(testLine);
           if (metrics.width > maxWidth && n > 0) {
-            ctx.fillText(line.trim(), centerX, currentY);
+            lineCount++;
+            if (lineCount >= maxLines) {
+              ctx.fillText(line.trim() + '...', x, currentY);
+              ctx.restore();
+              return currentY;
+            }
+            ctx.fillText(line.trim(), x, currentY);
             line = words[n] + ' ';
             currentY += lineHeight;
           } else {
             line = testLine;
           }
         }
-        ctx.fillText(line.trim(), centerX, currentY);
+        ctx.fillText(line.trim(), x, currentY);
+        ctx.restore();
         return currentY;
       };
 
@@ -252,11 +293,11 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ctx.fillText('Official Society Theatrical Verdict', decreeTextX, plaqueY + 130);
       ctx.restore();
 
-      // 5. The Grand Alter Ego Stage Showcase (CENTERPIECE - Full of rich detail)
+      // 5. The Grand Alter Ego Stage Showcase (CENTERPIECE - Full of rich detail, Zero Squish, Zero Overflow)
       const stageX = 60;
-      const stageY = 405;
+      const stageY = 395;
       const stageW = width - 120;
-      const stageH = 885;
+      const stageH = 920;
 
       drawRoundedRect(stageX, stageY, stageW, stageH, 26);
       ctx.fillStyle = 'rgba(18, 13, 11, 0.95)';
@@ -275,15 +316,17 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
+      ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffd700';
       ctx.font = 'bold 14px "Cinzel", serif';
       ctx.letterSpacing = '3px';
       ctx.fillText('✦ OFFICIAL THEATRICAL ALTER EGO ✦', width / 2, stageY + 41);
+      ctx.restore();
 
-      // Character Portrait Poster (Larger, more commanding presence!)
-      const posterW = 460;
-      const posterH = 390;
+      // Character Portrait Poster (Proper 400x440 portrait aspect ratio, cropped cleanly via drawImageCover!)
+      const posterW = 400;
+      const posterH = 440;
       const posterX = width / 2 - posterW / 2;
       const posterY = stageY + 66;
 
@@ -292,8 +335,8 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
         ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
         ctx.fillRect(posterX + 6, posterY + 6, posterW, posterH);
 
-        // Poster image
-        ctx.drawImage(charImg, posterX, posterY, posterW, posterH);
+        // Poster image cropped symmetrically via drawImageCover (No squishing!)
+        drawImageCover(charImg, posterX, posterY, posterW, posterH);
 
         // Ornate Gold Frame
         ctx.strokeStyle = '#d4af37';
@@ -313,92 +356,128 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
         ctx.strokeRect(posterX, posterY + posterH - 42, posterW, 42);
 
         const charBadge = ((result as any).badge || (result as any).archetype || 'THEATRICAL ALTER EGO').toUpperCase();
+        ctx.save();
+        ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd700';
         ctx.font = 'bold 16px "Cinzel", serif';
         ctx.letterSpacing = '3px';
         ctx.fillText(charBadge, width / 2, posterY + posterH - 15);
+        ctx.restore();
       }
 
-      // Character Name
+      // Character Name (Auto-scales font so long names like DEADPOOL (WADE WILSON) fit comfortably!)
       const charName = (result.name || (result as any).character || 'Thespian').toUpperCase();
+      let nameFontSize = 34;
+      ctx.font = `bold ${nameFontSize}px "Cinzel", Georgia, serif`;
+      while (ctx.measureText(charName).width > stageW - 80 && nameFontSize > 22) {
+        nameFontSize -= 2;
+        ctx.font = `bold ${nameFontSize}px "Cinzel", Georgia, serif`;
+      }
+      ctx.save();
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 36px "Cinzel", Georgia, serif';
       ctx.letterSpacing = '2px';
-      ctx.fillText(charName, width / 2, stageY + 495);
+      ctx.fillText(charName, width / 2, stageY + 540);
+      ctx.restore();
 
-      // Archetype Title
+      // Archetype Title (Auto-scales font if needed)
+      let titleFontSize = 21;
+      ctx.font = `italic 600 ${titleFontSize}px "Playfair Display", Georgia, serif`;
+      while (ctx.measureText(`"${result.title}"`).width > stageW - 80 && titleFontSize > 15) {
+        titleFontSize -= 1;
+        ctx.font = `italic 600 ${titleFontSize}px "Playfair Display", Georgia, serif`;
+      }
+      ctx.save();
+      ctx.textAlign = 'center';
       ctx.fillStyle = (result as any).accentColor || '#ffd700';
-      ctx.font = 'italic 600 22px "Playfair Display", Georgia, serif';
       ctx.letterSpacing = '1px';
-      ctx.fillText(`"${result.title}"`, width / 2, stageY + 528);
+      ctx.fillText(`"${result.title}"`, width / 2, stageY + 572);
+      ctx.restore();
 
-      // Quote
+      // Quote (Auto-scales or wraps cleanly, keeping it snug)
+      const quoteStr = `"${result.quote || (result as any).pitch || ''}"`;
+      ctx.font = 'italic 500 17px "Playfair Display", serif';
       ctx.fillStyle = '#fce8d5';
-      ctx.font = 'italic 500 18px "Playfair Display", serif';
-      ctx.fillText(`"${result.quote || (result as any).pitch || ''}"`, width / 2, stageY + 560);
+      const quoteEndY = drawWrappedText(quoteStr, width / 2, stageY + 602, stageW - 80, 22, 'center', 2);
 
-      // Characteristics / Vibe text (Wrapped, centered, matching screenshot 2!)
+      // Characteristics / Vibe text (Wrapped cleanly within 840px, max 2 lines)
       const charVibe = (result as any).vibe || (result as any).description || '';
       if (charVibe) {
         ctx.fillStyle = 'rgba(252, 232, 213, 0.85)';
-        ctx.font = '400 16px "Plus Jakarta Sans", sans-serif';
-        drawCenteredWrappedText(charVibe, width / 2, stageY + 596, stageW - 80, 24);
+        ctx.font = '400 15px "Plus Jakarta Sans", sans-serif';
+        drawWrappedText(charVibe, width / 2, quoteEndY + 28, stageW - 80, 21, 'center', 2);
       }
 
-      // Backstage Tell & Rehearsal Habit Callout Box (Exactly like screenshot 2!)
+      // Backstage Tell & Rehearsal Habit Callout Box (Left-bordered aesthetic, exactly matching Screenshot 2!)
       const tellText = (result as any).stageTell || (result as any).backstageHabit || '';
       if (tellText) {
-        const tellBoxW = stageW - 80;
-        const tellBoxH = 75;
-        const tellBoxX = width / 2 - tellBoxW / 2;
-        const tellBoxY = stageY + 655;
+        const tellBoxW = stageW - 80; // 880
+        const tellBoxH = 80;
+        const tellBoxX = width / 2 - tellBoxW / 2; // 100
+        const tellBoxY = stageY + 695;
 
-        drawRoundedRect(tellBoxX, tellBoxY, tellBoxW, tellBoxH, 14);
-        ctx.fillStyle = 'rgba(10, 7, 6, 0.85)';
+        drawRoundedRect(tellBoxX, tellBoxY, tellBoxW, tellBoxH, 12);
+        ctx.fillStyle = 'rgba(10, 7, 6, 0.88)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
+        ctx.lineWidth = 1.2;
         ctx.stroke();
 
         // Left gold accent bar
         ctx.fillStyle = '#d4af37';
-        ctx.fillRect(tellBoxX, tellBoxY + 8, 4, tellBoxH - 16);
+        ctx.fillRect(tellBoxX, tellBoxY + 6, 4, tellBoxH - 12);
 
+        // Header label
+        ctx.save();
         ctx.textAlign = 'left';
         ctx.fillStyle = '#d4af37';
-        ctx.font = 'bold 12px "Cinzel", serif';
+        ctx.font = 'bold 11px "Cinzel", serif';
         ctx.letterSpacing = '2px';
         ctx.fillText('BACKSTAGE TELL & REHEARSAL HABIT', tellBoxX + 20, tellBoxY + 24);
+        ctx.restore();
 
+        // Habit quote: Left-aligned starting at tellBoxX + 20, maxWidth: tellBoxW - 40 (never overflows!)
         ctx.fillStyle = '#ffd700';
         ctx.font = 'italic 15px "Playfair Display", serif';
-        drawCenteredWrappedText(`"${tellText}"`, tellBoxX + tellBoxW / 2, tellBoxY + 50, tellBoxW - 40, 20);
+        drawWrappedText(`"${tellText}"`, tellBoxX + 20, tellBoxY + 48, tellBoxW - 40, 21, 'left', 2);
       }
 
-      // Hashtags (Rendered as pills, exactly like screenshot 2!)
+      // Hashtags (Auto-fitting pills centered below the box)
       const tags: string[] = (result as any).tags || ['#XTS2026', '#TheatricalAlterEgo'];
       if (tags.length > 0) {
-        ctx.font = 'bold 14px "Cinzel", sans-serif';
-        const tagWidths = tags.map(t => ctx.measureText(t).width + 32);
-        const totalTagsWidth = tagWidths.reduce((a, b) => a + b, 0) + (tags.length - 1) * 12;
+        let tagFontSize = 13;
+        ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
+        let tagWidths = tags.map(t => ctx.measureText(t).width + 28);
+        let totalTagsWidth = tagWidths.reduce((a, b) => a + b, 0) + (tags.length - 1) * 10;
+
+        // If tags are too wide, reduce font size slightly
+        if (totalTagsWidth > stageW - 60) {
+          tagFontSize = 11;
+          ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
+          tagWidths = tags.map(t => ctx.measureText(t).width + 22);
+          totalTagsWidth = tagWidths.reduce((a, b) => a + b, 0) + (tags.length - 1) * 8;
+        }
+
         let startX = width / 2 - totalTagsWidth / 2;
-        const tagY = stageY + 750;
-        const tagH = 32;
+        const tagY = stageY + 795;
+        const tagH = 30;
 
         tags.forEach((tag, idx) => {
           const tW = tagWidths[idx];
-          drawRoundedRect(startX, tagY, tW, tagH, 16);
+          drawRoundedRect(startX, tagY, tW, tagH, 15);
           ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
           ctx.fill();
           ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
           ctx.lineWidth = 1.2;
           ctx.stroke();
 
+          ctx.save();
           ctx.textAlign = 'center';
           ctx.fillStyle = '#ffd700';
-          ctx.fillText(tag, startX + tW / 2, tagY + 21);
-          startX += tW + 12;
+          ctx.font = `bold ${tagFontSize}px "Cinzel", sans-serif`;
+          ctx.fillText(tag, startX + tW / 2, tagY + 20);
+          ctx.restore();
+          startX += tW + 10;
         });
       }
 
@@ -406,26 +485,28 @@ export const StoryShareModal: React.FC<StoryShareModalProps> = ({
       const personalizedName = customName.trim() ? customName.toUpperCase() : null;
       if (personalizedName) {
         const namePillW = 460;
-        const namePillH = 38;
-        const namePillY = stageY + 800;
-        drawRoundedRect(width / 2 - namePillW / 2, namePillY, namePillW, namePillH, 19);
+        const namePillH = 36;
+        const namePillY = stageY + 840;
+        drawRoundedRect(width / 2 - namePillW / 2, namePillY, namePillW, namePillH, 18);
         ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
         ctx.fill();
         ctx.strokeStyle = '#d4af37';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
+        ctx.save();
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 16px "Cinzel", serif';
+        ctx.font = 'bold 15px "Cinzel", serif';
         ctx.letterSpacing = '2px';
-        ctx.fillText(`🎭 NAME ON T-SHIRT: ${personalizedName}`, width / 2, namePillY + 24);
+        ctx.fillText(`🎭 NAME ON T-SHIRT: ${personalizedName}`, width / 2, namePillY + 23);
+        ctx.restore();
       }
 
       // 6. Society Merch Highlights Bar
-      const merchY = 1310;
+      const merchY = 1335;
       const merchW = width - 120;
-      const merchH = 95;
+      const merchH = 90;
       drawRoundedRect(60, merchY, merchW, merchH, 18);
       ctx.fillStyle = 'rgba(244, 234, 225, 0.04)';
       ctx.fill();
