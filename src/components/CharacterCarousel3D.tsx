@@ -31,6 +31,8 @@ export const CharacterCarousel3D: React.FC = () => {
   // Touch & pointer drag state
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const isHorizontalSwipeRef = useRef<boolean | null>(null);
   const currentDragDeltaRef = useRef(0);
 
   // Resize listener for responsive 3D geometry
@@ -77,25 +79,54 @@ export const CharacterCarousel3D: React.FC = () => {
 
   // Touch/Drag handlers
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
-    isDraggingRef.current = true;
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
     startXRef.current = clientX;
+    startYRef.current = clientY;
     currentDragDeltaRef.current = 0;
+    isHorizontalSwipeRef.current = null;
+    isDraggingRef.current = true;
   };
 
   const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDraggingRef.current) return;
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    currentDragDeltaRef.current = clientX - startXRef.current;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    const deltaX = clientX - startXRef.current;
+    const deltaY = clientY - startYRef.current;
+
+    // Discriminate between vertical page scroll and horizontal card swipe
+    if (isHorizontalSwipeRef.current === null) {
+      // If user moves vertically first by more than 5px, immediately relinquish touch to browser for native scroll!
+      if (Math.abs(deltaY) > 5 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        isHorizontalSwipeRef.current = false;
+        isDraggingRef.current = false;
+        return;
+      }
+      // If user moves horizontally first by more than 8px, lock into card swipe
+      if (Math.abs(deltaX) > 8 && Math.abs(deltaX) >= Math.abs(deltaY)) {
+        isHorizontalSwipeRef.current = true;
+      }
+    }
+
+    if (isHorizontalSwipeRef.current) {
+      currentDragDeltaRef.current = deltaX;
+    }
   };
 
   const handleTouchEnd = () => {
-    if (!isDraggingRef.current) return;
+    if (!isDraggingRef.current || !isHorizontalSwipeRef.current) {
+      isDraggingRef.current = false;
+      isHorizontalSwipeRef.current = null;
+      currentDragDeltaRef.current = 0;
+      return;
+    }
     isDraggingRef.current = false;
+    isHorizontalSwipeRef.current = null;
     const delta = currentDragDeltaRef.current;
-    if (delta < -40) {
+    if (delta < -35) {
       handleNext();
-    } else if (delta > 40) {
+    } else if (delta > 35) {
       handlePrev();
     }
     currentDragDeltaRef.current = 0;
@@ -211,7 +242,7 @@ export const CharacterCarousel3D: React.FC = () => {
         className="relative w-full flex items-center justify-center overflow-x-clip py-2 sm:py-4 cursor-grab active:cursor-grabbing"
         style={{
           perspective: isMobile ? '800px' : '1200px',
-          height: isMobile ? '285px' : '390px',
+          height: isMobile ? '260px' : '390px',
           touchAction: 'pan-y',
         }}
         onTouchStart={handleTouchStart}
@@ -236,7 +267,7 @@ export const CharacterCarousel3D: React.FC = () => {
                 key={char.id}
                 onClick={() => handleSelectCard(index)}
                 className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out will-change-transform ${
-                  isMobile ? 'w-[182px] h-[275px]' : 'w-[255px] h-[375px]'
+                  isMobile ? 'w-[172px] h-[252px]' : 'w-[255px] h-[375px]'
                 } ${
                   isActive
                     ? 'bg-[#191311] border-2 border-[#ffd700] shadow-[0_0_35px_rgba(212,175,55,0.45)] ring-1 ring-[#ffd700]/50'
@@ -244,6 +275,7 @@ export const CharacterCarousel3D: React.FC = () => {
                 }`}
                 style={{
                   ...style,
+                  touchAction: 'pan-y',
                   transition:
                     'transform 500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 450ms ease, box-shadow 450ms ease',
                   WebkitFontSmoothing: 'antialiased',

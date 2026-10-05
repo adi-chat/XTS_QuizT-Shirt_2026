@@ -335,11 +335,17 @@ export default function App() {
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className={`relative z-10 pt-14 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col justify-center ${screen === 'landing' ? 'h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] lg:overflow-hidden' : 'min-h-[calc(100dvh-3.5rem)]'}`}>
+      <main className={`relative z-10 pt-14 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col justify-center ${
+        screen === 'landing'
+          ? 'min-h-[calc(100dvh-3.5rem)] pb-8 overflow-y-auto lg:h-[calc(100dvh-3.5rem)] lg:max-h-[calc(100dvh-3.5rem)] lg:pb-0 lg:overflow-hidden'
+          : screen === 'quiz'
+          ? 'h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col justify-between'
+          : 'min-h-[calc(100dvh-3.5rem)]'
+      }`}>
 
         {/* SCREEN 1: LANDING PAGE */}
         {screen === 'landing' && (
-          <div className="relative z-10 w-full max-w-7xl mx-auto h-full flex flex-col justify-between py-1 lg:py-2 animate-fade-in my-auto">
+          <div className="relative z-10 w-full max-w-7xl mx-auto min-h-full lg:h-full flex flex-col justify-between py-1 lg:py-2 animate-fade-in my-auto">
             {/* DESKTOP VIEW (lg+): 3 Columns (Hat Left -> Centralized Text + Aligned CTA Center -> Carousel Right) (Zero Scroll) */}
             <div className="hidden lg:grid grid-cols-12 gap-4 xl:gap-6 items-center h-full w-full py-2 my-auto">
               {/* 1. Sorting Hat (Left side of text, large & majestic) */}
@@ -455,30 +461,30 @@ export default function App() {
 
         {/* SCREEN 2: QUIZ PAGE */}
         {screen === 'quiz' && (
-          <div className="relative z-10 w-full max-w-6xl mx-auto h-full flex flex-col justify-between pt-2 pb-2 animate-fade-in my-auto">
-            {/* Theatrical Ceremony & Progress Header: High-Visibility Marquee (No Blinking, No Act Mentions) */}
-            <div className="w-full max-w-2xl mx-auto mb-4 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-[#201513]/95 via-[#2c1c18]/95 to-[#201513]/95 border-2 border-[#d4af37]/80 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.85),0_0_20px_rgba(212,175,55,0.25)] flex flex-col gap-2">
+          <div className="relative z-10 w-full max-w-6xl mx-auto h-full flex flex-col justify-between pt-1 pb-1 sm:pt-2 sm:pb-2 animate-fade-in my-auto">
+            {/* Theatrical Ceremony & Progress Header: High-Visibility Marquee */}
+            <div className="w-full max-w-2xl mx-auto mb-1.5 md:mb-4 px-3 sm:px-5 py-1.5 sm:py-2.5 md:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#201513]/95 via-[#2c1c18]/95 to-[#201513]/95 border border-[#d4af37]/80 backdrop-blur-md shadow-[0_6px_25px_rgba(0,0,0,0.85)] flex flex-col gap-1 sm:gap-2 shrink-0">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#ffd700] shrink-0" />
-                  <span className="font-cinzel text-xs sm:text-sm font-black tracking-widest text-[#ffd700] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ffd700] shrink-0" />
+                  <span className="font-cinzel text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#ffd700] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                     The Sorting Hat Ceremony
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 border border-[#d4af37]/60 shadow-inner">
-                  <span className="font-mono text-xs sm:text-sm font-bold text-white tracking-wider">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 border border-[#d4af37]/60 shadow-inner">
+                  <span className="font-mono text-[11px] sm:text-xs md:text-sm font-bold text-white tracking-wider">
                     Q{currentQIndex + 1}/10
                   </span>
                   <span className="text-[#ffd700] font-bold text-xs">•</span>
-                  <span className="font-mono text-xs sm:text-sm font-black text-[#ffd700]">
+                  <span className="font-mono text-[11px] sm:text-xs md:text-sm font-black text-[#ffd700]">
                     {progressPercentage}%
                   </span>
                 </div>
               </div>
 
               {/* Glowing High-Contrast Progress Bar Track */}
-              <div className="w-full h-2.5 sm:h-3 bg-[#120d0b] rounded-full overflow-hidden border border-[#d4af37]/50 shadow-inner p-0.5">
+              <div className="w-full h-1.5 sm:h-2.5 md:h-3 bg-[#120d0b] rounded-full overflow-hidden border border-[#d4af37]/50 shadow-inner p-0.5">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-[#942626] via-[#d4af37] to-[#ffd700] transition-all duration-500 ease-out shadow-[0_0_10px_rgba(255,215,0,0.8)]"
                   style={{ width: `${Math.max(progressPercentage, 4)}%` }}
@@ -487,8 +493,9 @@ export default function App() {
             </div>
 
             {/* Side-by-Side: Hat on Left, Question + Options on Right */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center flex-1 my-auto">
-              <div className="md:col-span-5 flex flex-col items-center justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-8 items-center flex-1 my-auto min-h-0">
+              {/* DESKTOP HAT (md+): Large & Majestic */}
+              <div className="hidden md:flex md:col-span-5 flex-col items-center justify-center">
                 <SortingHat
                   state={hatState}
                   faceImage={activeQuizFaceImage}
@@ -499,12 +506,40 @@ export default function App() {
                 />
               </div>
 
-              <div className="md:col-span-7 flex flex-col justify-center">
-                <h3 className="font-cinzel text-xl sm:text-2xl lg:text-3xl font-bold text-[#f4eae1] leading-snug mb-5 text-center md:text-left drop-shadow">
+              {/* MOBILE COMPACT HAT ROW (< md): Shrunk Hat + Thought Bubble in a sleek horizontal row (Under 60px tall) */}
+              <div className="flex md:hidden items-center gap-2.5 w-full bg-[#1c1513]/90 border border-[#d4af37]/50 rounded-xl p-2 shadow-lg backdrop-blur-md shrink-0">
+                {/* Compact Animated Hat */}
+                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full blur-sm bg-[#ffd700]/30 animate-pulse pointer-events-none" />
+                  <img
+                    src={
+                      activeQuizFaceImage
+                        ? (activeQuizFaceImage.startsWith('/') ? activeQuizFaceImage : `/assets/hat/${activeQuizFaceImage}`)
+                        : hatState === 'talking'
+                        ? '/assets/hat/hat_2.png'
+                        : '/assets/hat/hat_1.png'
+                    }
+                    alt="Sorting Hat"
+                    className="w-11 h-11 object-contain animate-hat-bob-weave filter drop-shadow-[0_2px_6px_rgba(255,215,0,0.4)]"
+                  />
+                </div>
+
+                {/* Snug Speech Bubble */}
+                <div className="flex-1 min-w-0 bg-[#140e0c] border border-[#d4af37]/40 rounded-lg px-2.5 py-1 shadow-inner relative">
+                  <p className="font-playfair text-[11px] italic text-[#fce8d5] leading-snug line-clamp-2">
+                    “{activeCommentary.replace(/^["“]|["”]$/g, '')}”
+                  </p>
+                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#140e0c] border-l border-b border-[#d4af37]/40 rotate-45" />
+                </div>
+              </div>
+
+              {/* QUESTION & OPTIONS */}
+              <div className="md:col-span-7 flex flex-col justify-center min-h-0">
+                <h3 className="font-cinzel text-sm sm:text-lg md:text-2xl lg:text-3xl font-bold text-[#f4eae1] leading-snug mb-2 md:mb-5 text-center md:text-left drop-shadow shrink-0">
                   {currentQuestion.prompt}
                 </h3>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5 sm:gap-2.5 md:gap-3">
                   {currentQuestion.options.map((option, idx) => {
                     const isSelected = pendingOptionId === option.id;
                     const letter = OPTION_LETTERS[idx];
@@ -516,15 +551,15 @@ export default function App() {
                         onMouseEnter={() => setHoveredOptionIndex(idx)}
                         onMouseLeave={() => setHoveredOptionIndex(null)}
                         onClick={() => handleOptionClick(option)}
-                        className={`group relative text-left p-3.5 sm:p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between gap-3 cursor-pointer ${
+                        className={`group relative text-left p-2 sm:p-3 md:p-3.5 rounded-xl border-2 transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
                           isSelected
-                            ? 'bg-[#7a1c1c]/50 border-[#ffd700] shadow-[0_0_20px_rgba(212,175,55,0.4)] scale-[1.01]'
-                            : 'bg-[#1e1715]/80 hover:bg-[#281f1b] border-[#d4af37]/30 hover:border-[#d4af37] hover:scale-[1.005]'
+                            ? 'bg-[#7a1c1c]/50 border-[#ffd700] shadow-[0_0_16px_rgba(212,175,55,0.4)] scale-[1.01]'
+                            : 'bg-[#1e1715]/80 hover:bg-[#281f1b] border-[#d4af37]/30 hover:border-[#d4af37]'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           <span
-                            className={`w-8 h-8 rounded-lg font-cinzel font-bold text-xs flex items-center justify-center shrink-0 border transition-colors ${
+                            className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg font-cinzel font-bold text-[11px] sm:text-xs flex items-center justify-center shrink-0 border transition-colors ${
                               isSelected
                                 ? 'bg-[#d4af37] text-[#120f0e] border-[#ffd700]'
                                 : 'bg-[#15100f] text-[#d4af37] border-[#d4af37]/40 group-hover:border-[#d4af37]'
@@ -533,14 +568,14 @@ export default function App() {
                             {letter}
                           </span>
 
-                          <span className="font-sans text-xs sm:text-sm text-[#fce8d5] font-medium leading-relaxed">
+                          <span className="font-sans text-[11.5px] sm:text-xs md:text-sm text-[#fce8d5] font-medium leading-snug">
                             {option.label}
                           </span>
                         </div>
 
                         {isSelected && (
-                          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-cinzel font-bold text-[#ffd700] shrink-0 bg-[#7a1c1c]/80 px-2.5 py-1 rounded-md border border-[#d4af37]/60">
-                            <CheckCircle className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-cinzel font-bold text-[#ffd700] shrink-0 bg-[#7a1c1c]/80 px-2 py-0.5 rounded-md border border-[#d4af37]/60">
+                            <CheckCircle className="w-3 h-3" />
                             Selected
                           </span>
                         )}
@@ -549,15 +584,15 @@ export default function App() {
                   })}
                 </div>
 
-                <div className="mt-5 flex items-center justify-between pt-3 border-t border-white/10">
+                <div className="mt-2 sm:mt-3 md:mt-5 flex items-center justify-between pt-1.5 sm:pt-2 md:pt-3 border-t border-white/10 shrink-0">
                   {currentQIndex > 0 ? (
                     <button
                       type="button"
                       onClick={handlePrevQuestion}
-                      className="inline-flex items-center gap-1 font-cinzel text-xs text-[#f4eae1]/60 hover:text-[#d4af37] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 font-cinzel text-xs text-[#f4eae1]/60 hover:text-[#d4af37] transition-colors cursor-pointer py-1"
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      Previous Question
+                      Previous
                     </button>
                   ) : (
                     <span />
@@ -567,7 +602,7 @@ export default function App() {
                     type="button"
                     onClick={handleConfirmSelection}
                     disabled={!pendingOptionId}
-                    className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-cinzel font-bold text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg cursor-pointer ${
+                    className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-cinzel font-bold text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg cursor-pointer ${
                       pendingOptionId
                         ? 'bg-gradient-to-r from-[#d4af37] to-[#ffd700] text-[#120f0e] hover:scale-105 glow-gold-pulse'
                         : 'bg-white/5 text-white/30 border border-white/10 cursor-not-allowed'
