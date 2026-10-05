@@ -1,4 +1,4 @@
-# The Sorting Hat's Verdict | XTS Official Merch Campaign
+# The Sorting Hat's Verdict | Xaverian Theatrical Society
 
 A theatrical interactive web application built for the **Xaverian Theatrical Society (XTS)**. Users experience a Hogwarts-style Sorting Hat ceremony featuring an intelligent 10-question personality quiz, a 30-character theatrical alter-ego roster, dynamic hat facial animations, real-time Web Audio soundscapes, an interactive 3D polo customizer, and 9:16 Instagram Story card generator.
 
