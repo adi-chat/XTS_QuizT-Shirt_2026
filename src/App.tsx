@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { QUIZ_QUESTIONS } from './data/quizQuestions';
 import { CHARACTERS_CATALOG } from './data/characters';
@@ -86,6 +86,30 @@ export default function App() {
 
   const currentQuestion = QUIZ_QUESTIONS[currentQIndex] || QUIZ_QUESTIONS[0];
   const progressPercentage = Math.round(((currentQIndex) / QUIZ_QUESTIONS.length) * 100);
+
+  // Automatically reset scroll position to top whenever screen or question advances
+  useEffect(() => {
+    const resetScroll = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      if (landingContainerRef.current) {
+        landingContainerRef.current.scrollTop = 0;
+      }
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.scrollTop = 0;
+      }
+    };
+
+    resetScroll();
+    const frameId = requestAnimationFrame(resetScroll);
+    const timeoutId = setTimeout(resetScroll, 60);
+    return () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(timeoutId);
+    };
+  }, [screen, currentQIndex]);
 
   const handleToggleSound = () => {
     const muted = soundManager.toggleMute();
@@ -436,24 +460,27 @@ export default function App() {
                 </p>
               </div>
 
-              {/* 3D Rotating Character Cover Flow */}
-              <div className="w-full">
-                <CharacterCarousel3D />
-              </div>
-
-              {/* Mobile Tagline & Primary CTA Button */}
-              <div className="flex flex-col items-center text-center mt-1 space-y-1.5 w-full">
+              {/* Center Stage: Mobile Tagline & Primary CTA Button */}
+              <div className="flex flex-col items-center text-center pt-1 pb-1 space-y-2 w-full">
                 <p className="font-sans text-[10px] text-[#ffd700]/90 font-medium tracking-wide">
                   ✨ 10 questions. One theatrical fate. ✨
                 </p>
-                <button
-                  type="button"
-                  id="enter-quiz-mobile-btn"
-                  onClick={handleStartQuiz}
-                  className="w-full max-w-xs inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7a1c1c] via-[#8c2222] to-[#5a1313] hover:from-[#942626] hover:to-[#6d1717] border-2 border-[#d4af37] text-[#ffd700] font-cinzel font-bold text-xs tracking-widest uppercase shadow-[0_0_20px_rgba(212,175,55,0.35)] transform active:scale-95 transition-all duration-300 glow-gold-pulse cursor-pointer"
-                >
-                  <span>Consult the Hat →</span>
-                </button>
+                <div className="relative group w-full max-w-xs flex justify-center">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#ffd700] via-[#e11d48] to-[#ffd700] rounded-2xl blur-sm opacity-80 animate-pulse pointer-events-none" />
+                  <button
+                    type="button"
+                    id="enter-quiz-mobile-btn"
+                    onClick={handleStartQuiz}
+                    className="relative w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#7a1c1c] via-[#8c2222] to-[#5a1313] hover:from-[#942626] hover:to-[#6d1717] border-2 border-[#ffd700] text-[#ffd700] font-cinzel font-bold text-xs tracking-widest uppercase shadow-[0_0_25px_rgba(212,175,55,0.45)] transform active:scale-95 transition-all duration-300 glow-gold-pulse cursor-pointer"
+                  >
+                    <span>Consult the Hat →</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 3D Rotating Character Cover Flow (Explore by scrolling down) */}
+              <div className="w-full pt-1 pb-4">
+                <CharacterCarousel3D />
               </div>
             </div>
           </div>
