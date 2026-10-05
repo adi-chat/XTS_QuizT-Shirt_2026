@@ -544,3 +544,5 @@ export const CHARACTERS_CATALOG: Record<string, CharacterProfile> = {
     badge: 'PRODUCTION ANCHOR',
   },
 };
+
+export const CHARACTERS = Object.values(CHARACTERS_CATALOG);

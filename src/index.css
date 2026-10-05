@@ -10,8 +10,8 @@
 
   body {
     font-family: var(--font-sans);
-    background: radial-gradient(ellipse at 50% 15%, #240c14 0%, #17080e 40%, #0d0508 75%, #060204 100%);
-    color: #f4eae1;
+    background: linear-gradient(180deg, #381215 0%, #4a181a 14%, #381324 30%, #231132 52%, #130a24 76%, #080514 100%);
+    color: #fcf6ee;
     overflow-x: hidden;
     min-height: 100vh;
   }

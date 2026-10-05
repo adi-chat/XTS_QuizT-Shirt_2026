@@ -30,6 +30,7 @@ interface SortingHatProps {
   showSpeechBubble?: boolean;
   bubblePosition?: 'top' | 'top-right' | 'top-left';
   bubbleType?: string;
+  bubbleSpacing?: string;
   onHatClick?: () => void;
 }
 
@@ -40,6 +41,7 @@ export const SortingHat: React.FC<SortingHatProps> = ({
   size = 'md',
   showSpeechBubble = true,
   bubblePosition = 'top',
+  bubbleSpacing,
   onHatClick,
 }) => {
   // Deliberation animation frame cycling state
@@ -117,11 +119,11 @@ export const SortingHat: React.FC<SortingHatProps> = ({
       className="relative flex flex-col items-center select-none"
       onContextMenu={e => e.preventDefault()}
     >
-      {/* Speech / Thought Bubble (Brought snug and close to the Hat crown with rock-solid stability) */}
+      {/* Speech / Thought Bubble */}
       {showSpeechBubble && commentary && (
         <div
           className={`relative z-30 ${
-            size === 'xs' ? '-mb-3 sm:-mb-5' : '-mb-6 sm:-mb-8 lg:-mb-10'
+            bubbleSpacing || (size === 'xs' ? 'mb-1.5' : 'mb-2 sm:mb-3')
           } flex flex-col items-center transition-all duration-300 transform ${
             state !== 'idle' ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-95'
           } ${
@@ -136,22 +138,19 @@ export const SortingHat: React.FC<SortingHatProps> = ({
           <div
             className={`w-full ${
               size === 'xs' ? 'px-4 pt-2.5 pb-3.5 rounded-xl border' : 'px-5 py-3 rounded-2xl border-2'
-            } bg-gradient-to-b from-[#241a17]/95 via-[#1d1614]/95 to-[#161210]/98 border-[#d4af37]/80 text-[#fdf6ee] shadow-2xl text-center relative`}
+            } bg-[#1e1614] border-[#d4af37]/80 text-[#fdf6ee] text-center relative z-20`}
             style={{
               boxShadow:
-                '0 12px 30px -4px rgba(0, 0, 0, 0.95), 0 0 20px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255, 215, 0, 0.25)',
+                '0 12px 30px -4px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 215, 0, 0.25)',
             }}
           >
             <p className={`font-playfair ${size === 'xs' ? 'text-[12px] sm:text-xs' : 'text-xs sm:text-sm md:text-base'} italic text-[#fce8d5] leading-relaxed tracking-wide transition-all duration-200`}>
               “{commentary.replace(/^["“]|["”]$/g, '')}”
             </p>
-          </div>
 
-          {/* Integrated Tapered Speech Pointer Beak */}
-          <div className="relative flex justify-center -mt-[2px] pointer-events-none z-10">
+            {/* Extruding Comment Beak matching internal color */}
             <div
-              className="w-3.5 h-3 bg-[#161210] border-b border-r border-[#d4af37]/80 rotate-45 -translate-y-1 rounded-br-sm"
-              style={{ filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.85))' }}
+              className={`absolute ${size === 'xs' ? '-bottom-1.5 w-3 h-3' : '-bottom-2 w-3.5 h-3.5'} left-1/2 -translate-x-1/2 bg-[#1e1614] border-b-2 border-r-2 border-[#d4af37]/80 rotate-45 z-30 rounded-br-sm pointer-events-none`}
             />
           </div>
         </div>

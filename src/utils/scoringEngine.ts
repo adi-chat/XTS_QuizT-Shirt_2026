@@ -55,20 +55,30 @@ export function resolveCharacterByTemporalBand(
 
   let winningBand: 1 | 2 | 3 = 2; // Default flagship anchor: Mid-Rehearsal Grind
 
-  // If one band has strictly more answers for this archetype, it wins
-  if (b2 > b1 && b2 > b3) {
-    winningBand = 2;
-  } else if (b1 > b2 && b1 > b3) {
+  // 1. Strict majority in one band
+  if (b1 > b2 && b1 > b3) {
     winningBand = 1;
+  } else if (b2 > b1 && b2 > b3) {
+    winningBand = 2;
   } else if (b3 > b1 && b3 > b2) {
     winningBand = 3;
-  } else if (b2 >= b1 && b2 >= b3) {
-    // In any tie involving Band 2 (e.g. b1=1, b2=1 or 3-way tie), Band 2 wins (Regina George, Michael Scott, Ted Lasso, etc.)
-    winningBand = 2;
-  } else if (b1 > b3) {
+  }
+  // 2. Deterministic 2-way ties:
+  // If Band 1 ties with Band 2 (e.g. b1=1, b2=1, b3=0), Band 1 takes precedence (The Audition raw instinct)
+  else if (b1 === b2 && b1 > b3) {
     winningBand = 1;
-  } else {
+  }
+  // If Band 2 ties with Band 3 (e.g. b2=1, b3=1, b1=0), Band 2 takes precedence (Mid-Rehearsal Grind anchor)
+  else if (b2 === b3 && b2 > b1) {
+    winningBand = 2;
+  }
+  // If Band 1 ties with Band 3 (e.g. b1=1, b3=1, b2=0), Band 3 takes precedence (Curtain Call showdown)
+  else if (b1 === b3 && b1 > b2) {
     winningBand = 3;
+  }
+  // 3. 3-way tie (1, 1, 1): Flagship anchor Band 2
+  else {
+    winningBand = 2;
   }
 
   const matchedCharacter = Object.values(CHARACTERS_CATALOG).find(

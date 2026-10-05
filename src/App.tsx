@@ -9,7 +9,6 @@ import { SortingHat } from './components/SortingHat';
 import type { HatExpression } from './components/SortingHat';
 import { TShirtCustomizer } from './components/TShirtCustomizer';
 import { StoryShareModal } from './components/StoryShareModal';
-import { StickyCTA } from './components/StickyCTA';
 import { TheatreCurtains } from './components/TheatreCurtains';
 import SpotlightDust from './components/SpotlightDust';
 import { CharacterCarousel3D } from './components/CharacterCarousel3D';
@@ -22,7 +21,6 @@ import {
   Volume2,
   VolumeX,
   CheckCircle,
-  Tag,
 } from 'lucide-react';
 import { ORDER_FORM_URL } from './constants';
 import { preloadCriticalAssets, preloadImage } from './utils/preloadAssets';
@@ -71,7 +69,7 @@ export default function App() {
   const [pendingOptionId, setPendingOptionId] = useState<string | null>(null);
   const [hoveredOptionIndex, setHoveredOptionIndex] = useState<number | null>(null);
   const [activeCommentary, setActiveCommentary] = useState<string>(
-    "Ah, a bold soul approaches the sorting stool... Let's see what theatrical madness you harbor."
+    "A bold soul approaches... Let's see what theatrical madness you harbor."
   );
   const [hatState, setHatState] = useState<HatExpression>('idle');
   const [deliberationText, setDeliberationText] = useState<string>(HAT_DELIBERATION_PHRASES[0]);
@@ -303,7 +301,21 @@ export default function App() {
     setUserAnswers({});
     setPendingOptionId(null);
     setHatState('idle');
-    setActiveCommentary("Ah, a bold soul approaches the sorting stool... Let's see what theatrical madness you harbor.");
+    setActiveCommentary("A bold soul approaches... Let's see what theatrical madness you harbor.");
+  };
+
+  const handleScrollToCustomizer = () => {
+    soundManager.playClickPop();
+    const el = document.getElementById('tshirt-customizer-section');
+    if (el) {
+      const headerOffset = 64; // accounts for 56px fixed header + 8px breathing space
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
 
   // Determine active hat expression for quiz screen
@@ -317,19 +329,23 @@ export default function App() {
   return (
     <div
       ref={landingContainerRef}
-      className="relative min-h-screen w-full bg-[#120f0e] text-[#f4eae1] font-sans overflow-x-hidden selection:bg-[#d4af37] selection:text-[#120f0e]"
+      className="relative min-h-screen w-full bg-gradient-to-b from-[#381215] via-[#241132] to-[#090615] text-[#fcf6ee] font-sans overflow-x-hidden selection:bg-[#d4af37] selection:text-[#120f0e]"
     >
       <TheatreCurtains onEnter={() => setIsMuted(soundManager.getMuted())} />
       <SpotlightDust containerRef={landingContainerRef} />
       <FloatingCandles />
 
+      {/* Atmospheric Radial Glows: Amber-red top transitioning to purple bottom */}
+      <div className="fixed -top-24 left-1/2 -translate-x-1/2 w-[850px] h-[400px] bg-gradient-to-b from-amber-500/20 via-rose-700/15 to-transparent rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="fixed -bottom-24 left-1/2 -translate-x-1/2 w-[950px] h-[450px] bg-gradient-to-t from-purple-900/25 via-indigo-950/15 to-transparent rounded-full blur-[150px] pointer-events-none z-0" />
+
       {/* FIXED TOP HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-40 h-14 flex items-center justify-between px-4 sm:px-8 bg-gradient-to-r from-[#120f0e]/95 via-[#1a0a0f]/95 to-[#120f0e]/95 backdrop-blur-md border-b border-[#d4af37]/25 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+      <header className="fixed top-0 left-0 right-0 z-40 h-14 flex items-center justify-between px-4 sm:px-8 bg-gradient-to-r from-[#2a0e10]/95 via-[#1d0e22]/95 to-[#2a0e10]/95 backdrop-blur-md border-b border-[#ffd700]/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
         <div className="flex items-center gap-2.5">
           <img
             src="/assets/xts_logo.png"
             alt="XTS Logo"
-            className="w-8 h-8 rounded-full object-contain bg-white/10 p-0.5 border border-[#d4af37]/60 shadow-[0_0_12px_rgba(212,175,55,0.3)]"
+            className="w-8 h-8 rounded-full object-contain"
           />
           <span className="font-cinzel text-xs sm:text-sm font-bold tracking-widest text-[#f4eae1] uppercase drop-shadow-sm">
             Xaverian Theatrical Society
@@ -351,11 +367,10 @@ export default function App() {
           <button
             type="button"
             onClick={handleToggleSound}
-            className={`flex items-center gap-1.5 text-xs font-cinzel font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-              isMuted
+            className={`flex items-center gap-1.5 text-xs font-cinzel font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${isMuted
                 ? 'text-[#f4eae1]/50 border-white/10 bg-[#1c1715] hover:border-white/20'
                 : 'text-[#ffd700] border-[#d4af37]/60 bg-[#251e1b] shadow-[0_0_12px_rgba(212,175,55,0.3)] hover:border-[#d4af37]'
-            }`}
+              }`}
           >
             {isMuted ? (
               <>
@@ -373,13 +388,13 @@ export default function App() {
       </header>
 
       {/* MAIN CONTAINER */}
-      <main className={`relative z-10 pt-14 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col justify-center ${
-        screen === 'landing'
+      <main className={`relative z-10 pt-14 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col ${screen === 'result' ? 'justify-start' : 'justify-center'
+        } ${screen === 'landing'
           ? 'min-h-[calc(100dvh-3.5rem)] pb-8 overflow-y-auto lg:h-[calc(100dvh-3.5rem)] lg:max-h-[calc(100dvh-3.5rem)] lg:pb-0 lg:overflow-hidden'
           : screen === 'quiz'
-          ? 'h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col justify-between'
-          : 'min-h-[calc(100dvh-3.5rem)]'
-      }`}>
+            ? 'h-[calc(100dvh-3.5rem)] max-h-[calc(100dvh-3.5rem)] overflow-hidden flex flex-col justify-between'
+            : 'min-h-[calc(100dvh-3.5rem)]'
+        }`}>
 
         {/* SCREEN 1: LANDING PAGE */}
         {screen === 'landing' && (
@@ -395,36 +410,32 @@ export default function App() {
                   size="md"
                   showSpeechBubble={true}
                   bubbleType="thought"
+                  bubbleSpacing="mb-2 sm:mb-3"
                   onHatClick={handleLandingHatClick}
                 />
               </div>
 
               {/* 2. Text itself Centralized with Consult the Hat Button Aligned Directly Beneath It */}
-              <div className="col-span-5 xl:col-span-5 flex flex-col items-center text-center justify-center space-y-3.5 xl:space-y-4 px-2 -mt-3 xl:-mt-5">
+              <div className="col-span-5 xl:col-span-5 flex flex-col items-center text-center justify-center px-2 -mt-3 xl:-mt-5">
                 <div>
-                  <span className="text-xs xl:text-sm uppercase tracking-[0.25em] font-cinzel text-[#d4af37] font-bold mb-1.5 block">
-                    The Sorting Stool Awaits
-                  </span>
-                  <h1 className="font-cinzel text-3xl sm:text-4xl lg:text-[2.65rem] xl:text-[3.25rem] 2xl:text-[3.75rem] font-black text-[#f4eae1] leading-[1.12] mb-2.5 drop-shadow-md">
-                    The Sorting Hat’s <br />
-                    <span className="text-shimmer-gold glow-text-gold drop-shadow-lg">
+                  <h1 className="font-cinzel font-black leading-[1.12] mb-1">
+                    <span className="block text-lg sm:text-xl lg:text-2xl font-bold text-[#fbebdc]/90 tracking-widest uppercase mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                      The Sorting Hat’s
+                    </span>
+                    <span className="block text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-[3.5rem] 2xl:text-[4rem] text-shimmer-gold glow-text-gold drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] tracking-wide">
                       Theatrical Verdict
                     </span>
                   </h1>
-                  <p className="font-playfair text-sm xl:text-base 2xl:text-lg text-[#fce8d5]/85 italic leading-relaxed max-w-lg">
-                    Step onto the stage. Discover your theatrical alter ego... and prepare for the ultimate society verdict.
+
+                  <p className="font-cinzel text-xs sm:text-sm xl:text-base text-[#fce8d5]/90 italic tracking-wider drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] mt-3">
+                    10 questions, 1 unavoidable theatrical fate.
                   </p>
                 </div>
 
-                <p className="font-sans text-xs xl:text-sm text-[#ffd700]/90 font-medium tracking-wide">
-                  ✨ 10 questions. One unavoidable theatrical fate. ✨
-                </p>
-
-                {/* Consult the Hat Button: Centered & Directly Aligned with Middle Text (No stars in button) */}
-                <div className="relative group pt-1.5">
+                {/* Consult the Hat Button: Generous separation from the text */}
+                <div className="relative group mt-7 xl:mt-9 pt-1">
                   {/* Multi-Layer Radiant Aura & Pulse all around the button */}
-                  <div className="absolute -inset-1.5 bg-gradient-to-r from-[#ffd700] via-[#e11d48] to-[#ffd700] rounded-2xl blur-md opacity-85 group-hover:opacity-100 transition-all duration-500 animate-pulse pointer-events-none" />
-                  <div className="absolute -inset-3 bg-radial from-[#ffd700]/40 via-transparent to-transparent rounded-full blur-xl opacity-60 pointer-events-none animate-pulse" />
+                  <div className="absolute -inset-1.5 bg-gradient-to-r from-[#ffd700] via-[#ea580c] to-[#ffd700] rounded-2xl blur-md opacity-85 group-hover:opacity-100 transition-all duration-500 animate-pulse pointer-events-none" />
 
                   <button
                     type="button"
@@ -437,15 +448,15 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 3. Carousel Card (Right of text, more to the right) */}
+              {/* 3. Clan Cards Carousel (Right of text) */}
               <div className="col-span-4 xl:col-span-3.5 flex flex-col items-center justify-center w-full">
                 <CharacterCarousel3D />
               </div>
             </div>
 
-            {/* MOBILE VIEW (< lg): Exactly what user liked */}
-            <div className="flex lg:hidden flex-col items-center text-center py-1 space-y-2.5 w-full my-auto">
-              {/* The Animated Sorting Hat */}
+            {/* MOBILE VIEW (< lg): Consistent & Clutter-Free */}
+            <div className="flex lg:hidden flex-col items-center text-center py-1 space-y-3 w-full my-auto">
+              {/* The Animated Sorting Hat with its Thought Bubble */}
               <div className="w-full flex justify-center my-0.5">
                 <SortingHat
                   state={hatState}
@@ -460,27 +471,24 @@ export default function App() {
 
               {/* Titles & Description */}
               <div>
-                <span className="text-[10px] uppercase tracking-widest font-cinzel text-[#d4af37] font-bold mb-0.5 block">
-                  The Sorting Stool Awaits
-                </span>
-                <h1 className="font-cinzel text-xl font-black text-[#f4eae1] leading-tight mb-1 drop-shadow">
-                  The Sorting Hat’s <br />
-                  <span className="text-shimmer-gold glow-text-gold drop-shadow">
+                <h1 className="font-cinzel font-black leading-tight mb-1">
+                  <span className="block text-xs sm:text-sm font-bold text-[#fbebdc]/90 tracking-widest uppercase mb-0.5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                    The Sorting Hat’s
+                  </span>
+                  <span className="block text-2xl sm:text-3xl text-shimmer-gold glow-text-gold drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
                     Theatrical Verdict
                   </span>
                 </h1>
-                <p className="font-playfair text-[11px] text-[#fce8d5]/85 italic leading-snug max-w-xs">
-                  Step onto the stage. Discover your theatrical alter ego... and prepare for the ultimate society verdict.
+
+                <p className="font-cinzel text-[11px] sm:text-xs text-[#fce8d5]/90 italic tracking-wider drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] mt-1.5">
+                  10 questions, 1 unavoidable theatrical fate.
                 </p>
               </div>
 
-              {/* Center Stage: Mobile Tagline & Primary CTA Button */}
-              <div className="flex flex-col items-center text-center pt-1 pb-1 space-y-2 w-full">
-                <p className="font-sans text-[10px] text-[#ffd700]/90 font-medium tracking-wide">
-                  ✨ 10 questions. One theatrical fate. ✨
-                </p>
-                <div className="relative group w-full max-w-xs flex justify-center">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-[#ffd700] via-[#e11d48] to-[#ffd700] rounded-2xl blur-sm opacity-80 animate-pulse pointer-events-none" />
+              {/* Center Stage: Mobile Primary CTA Button with generous separation */}
+              <div className="flex flex-col items-center text-center pt-2 pb-1 w-full">
+                <div className="relative group w-full max-w-xs flex justify-center mt-1">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-[#ffd700] via-[#ea580c] to-[#ffd700] rounded-2xl blur-sm opacity-80 animate-pulse pointer-events-none" />
                   <button
                     type="button"
                     id="enter-quiz-mobile-btn"
@@ -492,7 +500,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 3D Rotating Character Cover Flow (Explore by scrolling down) */}
+              {/* 3D Clan Cards Carousel (Explore by swiping) */}
               <div className="w-full pt-1 pb-4">
                 <CharacterCarousel3D />
               </div>
@@ -502,32 +510,33 @@ export default function App() {
 
         {/* SCREEN 2: QUIZ PAGE */}
         {screen === 'quiz' && (
-          <div className="relative z-10 w-full max-w-6xl mx-auto h-full flex flex-col justify-between pt-1 pb-1 sm:pt-2 sm:pb-2 animate-fade-in my-auto">
-            {/* Theatrical Ceremony & Progress Header: High-Visibility Marquee */}
-            <div className="w-full max-w-2xl mx-auto mb-1.5 md:mb-4 px-3 sm:px-5 py-1.5 sm:py-2.5 md:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#201513]/95 via-[#2c1c18]/95 to-[#201513]/95 border border-[#d4af37]/80 backdrop-blur-md shadow-[0_6px_25px_rgba(0,0,0,0.85)] flex flex-col gap-1 sm:gap-2 shrink-0">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="relative z-10 w-full max-w-6xl mx-auto h-full flex flex-col justify-between pt-3.5 pb-1 sm:pt-5 sm:pb-2 animate-fade-in my-auto">
+            {/* Theatrical Ceremony Progress Header (Unboxed, Sleek Bar - Distanced 10px+ from top bar) */}
+            <div className="w-full max-w-2xl mx-auto mt-1 mb-2 md:mb-5 px-1 sm:px-0 flex flex-col gap-1.5 shrink-0">
+              <div className="flex items-center justify-between gap-2 px-1">
+                <div className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ffd700] shrink-0" />
                   <span className="font-cinzel text-[11px] sm:text-xs md:text-sm font-black tracking-widest text-[#ffd700] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                     The Sorting Hat Ceremony
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-black/70 border border-[#d4af37]/60 shadow-inner">
-                  <span className="font-mono text-[11px] sm:text-xs md:text-sm font-bold text-white tracking-wider">
+                {/* Question counter & percentage (Unboxed, clean text) */}
+                <div className="flex items-center gap-1.5 font-mono text-[11px] sm:text-xs md:text-sm font-bold">
+                  <span className="text-[#fce8d5]/90 tracking-wider">
                     Q{currentQIndex + 1}/10
                   </span>
-                  <span className="text-[#ffd700] font-bold text-xs">•</span>
-                  <span className="font-mono text-[11px] sm:text-xs md:text-sm font-black text-[#ffd700]">
+                  <span className="text-[#ffd700]">•</span>
+                  <span className="text-[#ffd700] font-black">
                     {progressPercentage}%
                   </span>
                 </div>
               </div>
 
               {/* Glowing High-Contrast Progress Bar Track */}
-              <div className="w-full h-1.5 sm:h-2.5 md:h-3 bg-[#120d0b] rounded-full overflow-hidden border border-[#d4af37]/50 shadow-inner p-0.5">
+              <div className="w-full h-1.5 sm:h-2 md:h-2.5 bg-[#120d0b]/80 rounded-full overflow-hidden border border-[#d4af37]/60 shadow-[0_0_10px_rgba(0,0,0,0.8)] p-0.5">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#942626] via-[#d4af37] to-[#ffd700] transition-all duration-500 ease-out shadow-[0_0_10px_rgba(255,215,0,0.8)]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#942626] via-[#d4af37] to-[#ffd700] transition-all duration-500 ease-out shadow-[0_0_12px_rgba(255,215,0,0.8)]"
                   style={{ width: `${Math.max(progressPercentage, 4)}%` }}
                 />
               </div>
@@ -547,30 +556,31 @@ export default function App() {
                 />
               </div>
 
-              {/* MOBILE COMPACT HAT ROW (< md): Shrunk Hat + Thought Bubble in a sleek horizontal row (Under 60px tall) */}
-              <div className="flex md:hidden items-center gap-2.5 w-full bg-[#1c1513]/90 border border-[#d4af37]/50 rounded-xl p-2 shadow-lg backdrop-blur-md shrink-0">
-                {/* Compact Animated Hat */}
-                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full blur-sm bg-[#ffd700]/30 animate-pulse pointer-events-none" />
+              {/* MOBILE VIEW (< md): Centered Speech Bubble on Top + Scaled-Up Hat Below with Visible Expressions */}
+              <div className="flex md:hidden flex-col items-center justify-center w-full shrink-0 my-0.5">
+                {/* Speech Bubble Spoken by the Sorting Hat */}
+                <div className="relative z-20 w-full max-w-[340px] bg-[#1e1614] border border-[#d4af37]/80 rounded-xl px-4 py-1.5 text-center shadow-[0_4px_16px_rgba(0,0,0,0.85)] mb-2">
+                  <p className="font-playfair text-xs italic text-[#fce8d5] leading-snug line-clamp-2">
+                    “{activeCommentary.replace(/^["“]|["”]$/g, '')}”
+                  </p>
+                  {/* Extruding Comment Beak - 100% Solid #1e1614, exactly coherent with text box */}
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#1e1614] border-b border-r border-[#d4af37]/80 rotate-45 z-30 rounded-br-sm pointer-events-none" />
+                </div>
+
+                {/* Centered Animated Sorting Hat (Aura contained so it doesn't bleed into the beak!) */}
+                <div className="relative z-10 w-32 h-32 sm:w-36 sm:h-36 flex items-center justify-center -my-1">
+                  <div className="absolute top-6 inset-x-2 bottom-0 rounded-full blur-lg bg-[#ffd700]/25 animate-pulse pointer-events-none" />
                   <img
                     src={
                       activeQuizFaceImage
                         ? (activeQuizFaceImage.startsWith('/') ? activeQuizFaceImage : `/assets/hat/${activeQuizFaceImage}`)
                         : hatState === 'talking'
-                        ? '/assets/hat/hat_2.png'
-                        : '/assets/hat/hat_1.png'
+                          ? '/assets/hat/hat_2.png'
+                          : '/assets/hat/hat_1.png'
                     }
                     alt="Sorting Hat"
-                    className="w-11 h-11 object-contain animate-hat-bob-weave filter drop-shadow-[0_2px_6px_rgba(255,215,0,0.4)]"
+                    className="w-32 h-32 sm:w-36 sm:h-36 object-contain animate-hat-bob-weave filter drop-shadow-[0_8px_20px_rgba(255,215,0,0.6)] select-none"
                   />
-                </div>
-
-                {/* Snug Speech Bubble */}
-                <div className="flex-1 min-w-0 bg-[#140e0c] border border-[#d4af37]/40 rounded-lg px-2.5 py-1 shadow-inner relative">
-                  <p className="font-playfair text-[11px] italic text-[#fce8d5] leading-snug line-clamp-2">
-                    “{activeCommentary.replace(/^["“]|["”]$/g, '')}”
-                  </p>
-                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#140e0c] border-l border-b border-[#d4af37]/40 rotate-45" />
                 </div>
               </div>
 
@@ -592,19 +602,17 @@ export default function App() {
                         onMouseEnter={() => setHoveredOptionIndex(idx)}
                         onMouseLeave={() => setHoveredOptionIndex(null)}
                         onClick={() => handleOptionClick(option)}
-                        className={`group relative text-left p-2 sm:p-3 md:p-3.5 rounded-xl border-2 transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${
-                          isSelected
+                        className={`group relative text-left p-2 sm:p-3 md:p-3.5 rounded-xl border-2 transition-all duration-200 flex items-center justify-between gap-2.5 cursor-pointer ${isSelected
                             ? 'bg-[#7a1c1c]/50 border-[#ffd700] shadow-[0_0_16px_rgba(212,175,55,0.4)] scale-[1.01]'
                             : 'bg-[#1e1715]/80 hover:bg-[#281f1b] border-[#d4af37]/30 hover:border-[#d4af37]'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span
-                            className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg font-cinzel font-bold text-[11px] sm:text-xs flex items-center justify-center shrink-0 border transition-colors ${
-                              isSelected
+                            className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg font-cinzel font-bold text-[11px] sm:text-xs flex items-center justify-center shrink-0 border transition-colors ${isSelected
                                 ? 'bg-[#d4af37] text-[#120f0e] border-[#ffd700]'
                                 : 'bg-[#15100f] text-[#d4af37] border-[#d4af37]/40 group-hover:border-[#d4af37]'
-                            }`}
+                              }`}
                           >
                             {letter}
                           </span>
@@ -643,11 +651,10 @@ export default function App() {
                     type="button"
                     onClick={handleConfirmSelection}
                     disabled={!pendingOptionId}
-                    className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-cinzel font-bold text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg cursor-pointer ${
-                      pendingOptionId
+                    className={`inline-flex items-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-cinzel font-bold text-xs sm:text-sm tracking-wider uppercase transition-all shadow-lg cursor-pointer ${pendingOptionId
                         ? 'bg-gradient-to-r from-[#d4af37] to-[#ffd700] text-[#120f0e] hover:scale-105 glow-gold-pulse'
                         : 'bg-white/5 text-white/30 border border-white/10 cursor-not-allowed'
-                    }`}
+                      }`}
                   >
                     <span>{pendingOptionId ? 'Confirm Choice →' : 'Select an Answer'}</span>
                   </button>
@@ -668,218 +675,302 @@ export default function App() {
               bubbleType="thought"
             />
 
-            <div className="mt-4 flex flex-col items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1e1715]/80 border border-[#d4af37]/40 shadow-lg">
-                <Sparkles className="w-3.5 h-3.5 text-[#ffd700]" />
-                <span className="font-cinzel text-xs uppercase tracking-widest text-[#d4af37] font-bold">
-                  The Ceremony of the Stool
-                </span>
-              </div>
-              <p className="text-xs text-[#fce8d5]/70 font-sans tracking-wide">
+            <div className="mt-5 flex flex-col items-center">
+              <p className="text-sm sm:text-base md:text-lg text-[#fce8d5]/90 font-cinzel font-semibold tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] max-w-md mx-auto leading-relaxed">
                 Consulting the ancient theatrical archives across all 30 alter egos...
               </p>
             </div>
           </div>
         )}
 
-        {/* SCREEN 4: RESULT SCREEN (STAGE 1 -> STAGE 2 -> STAGE 3 HIERARCHY) */}
+        {/* SCREEN 4: RESULT SCREEN (COMPLETELY ABOVE-THE-FOLD ON DESKTOP & MOBILE) */}
         {screen === 'result' && (
-          <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col gap-10 pb-32 animate-fade-in pt-4">
+          <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col gap-6 pb-16 animate-fade-in pt-1 sm:pt-2">
 
-            {/* ========================================================================= */}
-            {/* STAGE 1: THE REVEAL FIRST! "YOUR THEATRICAL ALTER EGO"                    */}
-            {/* ========================================================================= */}
-            <div className="w-full bg-gradient-to-br from-[#1b1514]/95 via-[#16100f]/95 to-[#100b0a]/95 border-2 border-[#d4af37]/50 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden">
+            {/* UNIFIED HERO REVEAL: Sorting Hat + Alter Ego + 3 Action Buttons all at a glance */}
+            <div className="w-full relative">
+              {/* Subtle ambient aura behind character and hat */}
               <div
-                className="absolute -right-20 -top-20 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none"
+                className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-[130px] opacity-25 pointer-events-none"
                 style={{ backgroundColor: winningCharacter.accentColor || '#d4af37' }}
               />
 
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-[#d4af37]/25 pb-5 mb-8">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">🎭</span>
-                  <div>
-                    <span className="text-[11px] font-cinzel font-bold uppercase tracking-widest text-[#d4af37] block">
-                      Official Society Theatrical Casting
-                    </span>
-                    <h3 className="font-cinzel text-xl sm:text-2xl font-black text-[#f4eae1]">
-                      Your Theatrical Alter Ego
-                    </h3>
-                  </div>
-                </div>
+              {/* ----------------- DESKTOP VIEW (md+): Perfectly Aligned, Scaled, Zero Scroll ----------------- */}
+              <div className="hidden md:flex flex-col w-full">
+                {/* Two-Column Grid: items-start guarantees character & text align with top speech bubble! */}
+                <div className="grid grid-cols-12 gap-6 lg:gap-8 items-start">
 
-                <div className="flex items-center gap-2">
-                  <span
-                    className="text-xs font-cinzel font-bold px-3.5 py-1 rounded-full border shadow-sm"
-                    style={{
-                      color: winningCharacter.accentColor || '#ffd700',
-                      borderColor: `${winningCharacter.accentColor || '#ffd700'}66`,
-                      backgroundColor: `${winningCharacter.accentColor || '#ffd700'}18`,
-                    }}
-                  >
-                    {winningCharacter.badge || 'THEATRICAL ALTER EGO'}
-                  </span>
-                </div>
-              </div>
+                  {/* LEFT (5 cols): Speech Bubble + Scaled Hat + Mandate Headline */}
+                  <div className="col-span-5 flex flex-col items-center text-center">
+                    {/* Speech Bubble */}
+                    <div className="relative w-full max-w-[360px] bg-[#1e1614] border-2 border-[#d4af37]/80 rounded-2xl px-5 py-2.5 text-center shadow-[0_6px_25px_rgba(0,0,0,0.8),0_0_15px_rgba(212,175,55,0.15)] mb-3">
+                      <p className="font-playfair text-xs sm:text-sm italic text-[#fce8d5] leading-snug tracking-wide">
+                        “I HAVE SEEN YOUR DESTINY!<br />THE THEATRE HAS SPOKEN!”
+                      </p>
+                      {/* Extruding Comment Beak matching internal color */}
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#1e1614] border-b-2 border-r-2 border-[#d4af37]/80 rotate-45 z-10 rounded-br-sm pointer-events-none" />
+                    </div>
 
-              {/* Side-by-Side: Grand Poster Left, Full Traits & Details Right */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Poster Left */}
-                <div className="lg:col-span-5 flex flex-col items-center justify-center">
-                  <div className="w-56 sm:w-64 md:w-72 aspect-[2/3] rounded-2xl overflow-hidden border-2 border-[#d4af37] shadow-[0_0_35px_rgba(212,175,55,0.35)] relative bg-[#0e0a09] group">
-                    <img
-                      src={winningCharacter.image}
-                      alt={winningCharacter.name}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-2.5 sm:p-3 text-center">
-                      <span className="text-[10.5px] sm:text-xs font-cinzel font-black uppercase tracking-wider text-[#ffd700] block leading-tight">
-                        {winningCharacter.title}
+                    {/* Scaled-UP Sorting Hat (Proud, Authoritative & Majestic ~220-250px) */}
+                    <div className="relative w-56 h-56 sm:w-60 sm:h-60 lg:w-64 lg:h-64 flex items-center justify-center my-0.5">
+                      <div
+                        className="absolute inset-0 rounded-full blur-2xl pointer-events-none transition-all duration-700 animate-pulse"
+                        style={{
+                          background: 'radial-gradient(circle, rgba(255, 215, 0, 0.7) 0%, rgba(245, 198, 66, 0.4) 40%, rgba(220, 38, 38, 0.25) 65%, transparent 80%)'
+                        }}
+                      />
+                      <img
+                        src="/assets/hat/hat_4.png"
+                        alt="Sorting Hat Verdict"
+                        className="w-56 h-56 sm:w-60 sm:h-60 lg:w-64 lg:h-64 object-contain animate-hat-bob-weave filter drop-shadow-[0_10px_25px_rgba(255,215,0,0.6)] select-none"
+                      />
+                    </div>
+
+                    {/* Mandate Headline (with quotes around “THE XTS T-SHIRT!” - Larger Font) */}
+                    <div className="mt-2 text-center">
+                      <span className="font-cinzel text-xs sm:text-sm lg:text-base font-bold text-[#f4eae1]/85 tracking-widest uppercase block mb-1">
+                        YOU NEED TO REGISTER
                       </span>
+                      <h2 className="font-cinzel text-xl sm:text-2xl lg:text-3xl font-black text-shimmer-gold glow-text-gold tracking-wide leading-tight">
+                        FOR{' '}
+                        <span className="underline decoration-[#c41230] decoration-4 underline-offset-4">
+                          “THE XTS T-SHIRT!”
+                        </span>
+                      </h2>
                     </div>
                   </div>
+
+                  {/* RIGHT (7 cols): Image extends from top till the XTS T-shirt line, details center-aligned! */}
+                  <div className="col-span-7 flex flex-row items-stretch gap-6">
+                    {/* Poster Image: 10px lower from top bar */}
+                    <div className="w-56 lg:w-60 h-[360px] lg:h-[375px] shrink-0 rounded-2xl overflow-hidden border-2 border-[#d4af37] shadow-[0_0_35px_rgba(212,175,55,0.35)] relative bg-[#0e0a09] group mt-[10px]">
+                      <img
+                        src={winningCharacter.image}
+                        alt={winningCharacter.name}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-2 text-center">
+                        <span className="text-[11px] font-cinzel font-black uppercase tracking-wider text-[#ffd700] block leading-tight">
+                          {winningCharacter.title}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Character Name, Archetype, Quote, Society Ruling - ALL CENTER-ALIGNED! */}
+                    <div className="flex flex-col items-center text-center justify-center gap-1.5 flex-1 min-w-0 self-center mt-[10px]">
+                      <span className="text-[11px] font-cinzel font-bold uppercase tracking-widest text-[#d4af37]">
+                        Your Theatrical Alter Ego
+                      </span>
+
+                      <h3 className="font-cinzel text-2xl lg:text-3xl font-black text-[#fffdfa] drop-shadow-md leading-tight">
+                        {winningCharacter.name}
+                      </h3>
+
+                      {/* Archetype title text directly below name text - centered, NO BOX! */}
+                      <div className="flex items-center my-0.5">
+                        <span
+                          className="text-xs sm:text-sm font-cinzel font-black tracking-[0.2em] uppercase drop-shadow-sm"
+                          style={{ color: winningCharacter.accentColor || '#ffd700' }}
+                        >
+                          ✦ {winningCharacter.badge || 'THEATRICAL ALTER EGO'} ✦
+                        </span>
+                      </div>
+
+                      <blockquote className="my-1.5 text-xs sm:text-sm italic text-[#fce8d5] font-playfair leading-relaxed max-w-md">
+                        “{winningCharacter.quote}”
+                      </blockquote>
+
+                      {/* Official Society Ruling - Clean narrative, centered, NO BOX! */}
+                      <div className="mt-2 text-center max-w-md">
+                        <span className="text-[#ffd700] font-cinzel text-xs sm:text-sm font-bold tracking-widest uppercase block mb-1 drop-shadow-sm">
+                          OFFICIAL SOCIETY RULING FOR {winningCharacter.name.toUpperCase()}:
+                        </span>
+                        <p className="font-sans text-xs sm:text-sm text-[#fce8d5]/90 leading-relaxed">
+                          {winningCharacter.merchPitch}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
-                {/* Details Right */}
-                <div className="lg:col-span-7 flex flex-col text-center lg:text-left">
-                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-2">
-                    <h4 className="font-cinzel text-3xl sm:text-4xl font-black text-[#f4eae1]">
-                      {winningCharacter.name}
-                    </h4>
-                    <span
-                      className="text-xs sm:text-sm font-cinzel font-bold px-3 py-1 rounded-full border shadow-sm"
-                      style={{
-                        color: winningCharacter.accentColor || '#ffd700',
-                        borderColor: `${winningCharacter.accentColor || '#ffd700'}66`,
-                        backgroundColor: `${winningCharacter.accentColor || '#ffd700'}18`,
-                      }}
-                    >
-                      {winningCharacter.title}
-                    </span>
-                  </div>
+                {/* Action Buttons Below: ALL ON THE SAME ROW! */}
+                <div className="flex items-center justify-center gap-4 pt-5">
+                  {/* Share Story Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#ffd700] to-[#f39c12] hover:from-[#e5c158] hover:to-[#ffe066] text-[#120f0e] font-cinzel font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fff2a8] cursor-pointer flex items-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4 text-[#120f0e]" />
+                    <span>Share Story</span>
+                  </button>
 
-                  <blockquote className="border-l-2 border-[#d4af37] pl-3 py-1 my-2 text-sm italic text-[#fce8d5]/90 text-left">
-                    "{winningCharacter.quote}"
-                  </blockquote>
+                  {/* Customize T-Shirt Button (Instant Smooth Scroll to Customizer) */}
+                  <button
+                    type="button"
+                    onClick={handleScrollToCustomizer}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#2a1d1b] to-[#3a2724] hover:from-[#422e2a] hover:to-[#4e3632] border border-[#d4af37] text-[#ffd700] font-cinzel font-bold text-xs uppercase tracking-wider hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 shadow-md"
+                  >
+                    <Sparkles className="w-4 h-4 text-[#ffd700]" />
+                    <span>Customize T-Shirt ↓</span>
+                  </button>
 
-                  <p className="font-sans text-sm sm:text-base text-[#fce8d5]/85 leading-relaxed mb-4">
-                    {winningCharacter.vibe}
-                  </p>
-
-                  {/* Stage Tell Box */}
-                  <div className="p-4 rounded-2xl bg-[#120f0e]/90 border-l-4 border-[#d4af37] text-left mb-4 shadow-lg">
-                    <span className="text-[10px] uppercase font-cinzel font-bold tracking-widest text-[#d4af37] block mb-1">
-                      Backstage Tell & Rehearsal Habit
-                    </span>
-                    <p className="font-playfair text-sm sm:text-base italic text-[#ffd700] leading-snug">
-                      "{winningCharacter.stageTell}"
-                    </p>
-                  </div>
-
-                  {/* Character Tags */}
-                  <div className="flex flex-wrap gap-2 mb-5 justify-center lg:justify-start">
-                    {winningCharacter.tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 text-xs font-mono px-3 py-1 rounded-full bg-[#d4af37]/15 border border-[#d4af37]/40 text-[#ffd700]"
-                      >
-                        <Tag className="w-3 h-3 text-[#d4af37]" />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Share CTA & Verdict Navigation Buttons */}
-                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setIsShareModalOpen(true)}
-                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#ffd700] to-[#f39c12] hover:from-[#e5c158] hover:to-[#ffe066] text-[#120f0e] font-cinzel font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(212,175,55,0.45)] hover:shadow-[0_0_35px_rgba(255,215,0,0.7)] hover:scale-105 active:scale-95 transition-all duration-300 border-2 border-[#fff2a8] cursor-pointer flex items-center gap-2"
-                    >
-                      <Share2 className="w-4 h-4 text-[#120f0e]" />
-                      <span>Share Story</span>
-                    </button>
-
+                  {/* Order T-Shirt Button with Radiant Glowing Effect! */}
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#ffd700] via-[#ea384c] to-[#ffd700] rounded-2xl blur-md opacity-85 group-hover:opacity-100 animate-pulse pointer-events-none" />
                     <a
-                      href="#the-hat-verdict-section"
-                      className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#7a1c1c] via-[#8c2222] to-[#5a1313] hover:from-[#9c2525] hover:to-[#6d1717] border-2 border-[#ffd700] text-[#ffd700] font-cinzel font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(180,30,30,0.5)] hover:shadow-[0_0_35px_rgba(212,175,55,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2 group cursor-pointer"
+                      href={ORDER_FORM_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#942626] via-[#b91c1c] to-[#7f1d1d] hover:from-[#a82828] hover:to-[#991b1b] border-2 border-[#ffd700] text-[#ffd700] font-cinzel font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(255,215,0,0.6),0_0_15px_rgba(220,38,38,0.7)] hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2"
                     >
-                      <Sparkles className="w-4 h-4 text-[#ffd700]" />
-                      <span>The Hat's Verdict ↓</span>
+                      <span>Order T-Shirt ↗</span>
                     </a>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* ========================================================================= */}
-            {/* STAGE 2: THE SORTING HAT'S MANDATE & MERCH DECREE                         */}
-            {/* ========================================================================= */}
-            <div
-              id="the-hat-verdict-section"
-              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-gradient-to-br from-[#241715]/98 via-[#1a1210]/98 to-[#120d0c]/98 border-2 border-[#ffd700] ring-4 ring-[#ffd700]/20 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(212,175,55,0.35)] relative overflow-hidden"
-            >
-              <div className="absolute -top-20 -left-20 w-80 h-80 bg-[#d4af37]/15 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="lg:col-span-5 flex flex-col items-center justify-center">
-                <SortingHat
-                  state="verdict"
-                  faceImage="hat_4.png"
-                  commentary="I HAVE SEEN YOUR DESTINY! THE THEATRE HAS SPOKEN!"
-                  size="lg"
-                  showSpeechBubble={true}
-                />
-              </div>
-
-              <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#d4af37]/20 border border-[#d4af37] text-[#ffd700] text-xs font-cinzel font-bold uppercase tracking-widest mb-3">
-                  <Sparkles className="w-3.5 h-3.5 text-[#ffd700]" />
-                  The Sorting Hat Has Decided
+              {/* ----------------- MOBILE HERO VIEW (< md): 100% Visible Above-the-Fold on First Load ----------------- */}
+              <div className="flex md:hidden flex-col items-center w-full gap-2.5 text-center">
+                {/* 1. Speech Bubble Spoken by the Sorting Hat */}
+                <div className="relative w-full max-w-[340px] bg-[#1e1614] border border-[#d4af37]/80 rounded-xl px-4 py-1.5 text-center shadow-md">
+                  <p className="font-playfair text-xs sm:text-sm font-semibold italic text-[#fce8d5] leading-snug tracking-wide">
+                    “I HAVE SEEN YOUR DESTINY!<br />THE THEATRE HAS SPOKEN!”
+                  </p>
+                  {/* Extruding Comment Beak */}
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#1e1614] border-b border-r border-[#d4af37]/80 rotate-45 z-10 rounded-br-sm pointer-events-none" />
                 </div>
 
-                <h2 className="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-black text-[#f4eae1] leading-[1.15] mb-4">
-                  YOU NEED TO REGISTER FOR <br />
-                  <span className="text-shimmer-gold glow-text-gold underline decoration-[#c41230] decoration-4 underline-offset-4">
-                    XTS T-SHIRTS!
-                  </span>
-                </h2>
+                {/* 2. Scaled Sorting Hat + Mandate Headline ("THE UNIQUE XTS TEXT") */}
+                <div className="flex flex-col items-center justify-center w-full">
+                  {/* Sorting Hat: Sized up by a few pixels in mobile view (w-40 h-40) */}
+                  <div className="relative w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center my-0.5">
+                    <div
+                      className="absolute inset-0 rounded-full blur-2xl pointer-events-none transition-all duration-700 animate-pulse"
+                      style={{
+                        background: 'radial-gradient(circle, rgba(255, 215, 0, 0.75) 0%, rgba(245, 198, 66, 0.45) 40%, rgba(220, 38, 38, 0.25) 65%, transparent 80%)'
+                      }}
+                    />
+                    <img
+                      src="/assets/hat/hat_4.png"
+                      alt="Sorting Hat"
+                      className="w-40 h-40 sm:w-44 sm:h-44 object-contain animate-hat-bob-weave filter drop-shadow-[0_12px_24px_rgba(255,215,0,0.75)] select-none"
+                    />
+                  </div>
 
-                {/* Character Tailored Merch Pitch */}
-                <div className="bg-[#241a18] border border-[#7a1c1c] p-4 sm:p-5 rounded-2xl text-left mb-6 shadow-xl max-w-xl">
-                  <span className="text-[#ffd700] font-cinzel text-xs font-bold tracking-widest uppercase block mb-1">
-                    Official Society Ruling for {winningCharacter.name}:
+                  {/* Unique XTS Mandate Text: White "YOU NEED TO REGISTER" + Landing Page Golden Shimmer on THE XTS T-SHIRT! (No quotes, sized up) */}
+                  <div
+                    className="text-center mt-1 cursor-pointer group"
+                    onClick={handleScrollToCustomizer}
+                    title="Click to customize your XTS T-Shirt"
+                  >
+                    <span className="font-cinzel text-sm sm:text-base font-black text-white tracking-[0.2em] uppercase block leading-tight mb-0.5 drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]">
+                      YOU NEED TO REGISTER
+                    </span>
+                    <h2 className="font-cinzel tracking-wide leading-tight group-hover:scale-105 transition-transform flex items-center justify-center gap-2 flex-wrap mt-0.5">
+                      <span className="text-sm sm:text-base font-bold text-[#fce8d5]/90 tracking-widest">
+                        FOR
+                      </span>
+                      <span className="text-xl sm:text-2xl lg:text-3xl font-black text-shimmer-gold glow-text-gold underline decoration-[#c41230] decoration-2 underline-offset-4 drop-shadow-[0_2px_12px_rgba(255,215,0,0.6)]">
+                        THE XTS T-SHIRT!
+                      </span>
+                    </h2>
+                  </div>
+                </div>
+
+                {/* 3. Character Row: Image on the LEFT (Larger!), Info & Quote on the RIGHT (Larger!) */}
+                <div className="flex items-center gap-3 w-full max-w-sm sm:max-w-md mx-auto px-1 text-left mt-1">
+                  {/* Left: Character Portrait Poster - Sized up to w-32 sm:w-36 */}
+                  <div className="w-32 sm:w-36 aspect-[2/3] shrink-0 rounded-2xl overflow-hidden border-2 border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.35)] relative bg-[#0e0a09]">
+                    <img
+                      src={winningCharacter.image}
+                      alt={winningCharacter.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/75 to-transparent px-1.5 py-1 text-center">
+                      <span className="text-[9px] sm:text-[10px] font-cinzel font-black uppercase tracking-wider text-[#ffd700] block truncate">
+                        {winningCharacter.title}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Alter Ego Name, Badge & Quote - Sized up with generous typography */}
+                  <div className="flex flex-col justify-center min-w-0 flex-1">
+                    <span className="text-[10px] sm:text-xs font-cinzel font-bold uppercase tracking-wider text-[#d4af37] block leading-none">
+                      Your Theatrical Alter Ego
+                    </span>
+
+                    <h3 className="font-cinzel text-xl sm:text-2xl font-black text-[#fffdfa] drop-shadow-md leading-tight mt-1 truncate">
+                      {winningCharacter.name}
+                    </h3>
+
+                    {/* Archetype Badge */}
+                    <div className="flex items-center my-1">
+                      <span
+                        className="text-xs sm:text-[13px] font-cinzel font-black tracking-wider uppercase drop-shadow-sm leading-none"
+                        style={{ color: winningCharacter.accentColor || '#ffd700' }}
+                      >
+                        ✦ {winningCharacter.badge || 'THEATRICAL ALTER EGO'} ✦
+                      </span>
+                    </div>
+
+                    {/* Quote on the side */}
+                    <blockquote className="mt-0.5 text-xs sm:text-[13px] italic text-[#fce8d5]/95 font-playfair leading-snug line-clamp-3">
+                      “{winningCharacter.quote}”
+                    </blockquote>
+                  </div>
+                </div>
+
+                {/* Official Society Ruling Below - Prominent & Legible */}
+                <div className="w-full max-w-sm sm:max-w-md mx-auto text-center px-1 mt-0.5">
+                  <span className="text-[#ffd700] font-cinzel text-xs sm:text-sm font-bold tracking-wider uppercase block mb-0.5 drop-shadow-sm leading-snug">
+                    OFFICIAL SOCIETY RULING FOR {winningCharacter.name.toUpperCase()}:
                   </span>
-                  <p className="font-sans text-sm sm:text-base text-[#fce8d5] leading-relaxed">
+                  <p className="font-sans text-xs sm:text-[13px] text-[#fce8d5]/90 leading-snug line-clamp-3">
                     {winningCharacter.merchPitch}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full">
-                  <a
-                    href="#tshirt-customizer-section"
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d4af37] to-[#ffd700] hover:from-[#e5c158] hover:to-[#ffe066] text-[#120f0e] font-cinzel font-black text-xs uppercase tracking-wider shadow-lg hover:shadow-xl transition-all cursor-pointer flex items-center gap-2"
+                {/* 4. Action Buttons (All 3 Buttons Visible on First Load with Clean Short Labels) */}
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1 items-center w-full max-w-sm sm:max-w-md mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="px-2 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#d4af37] via-[#ffd700] to-[#f39c12] text-[#120f0e] font-cinzel font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Customize Your Shirt ↓
-                  </a>
+                    <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#120f0e] shrink-0" />
+                    <span className="whitespace-nowrap">Share</span>
+                  </button>
 
-                  <a
-                    href={ORDER_FORM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#7a1c1c] to-[#942626] hover:from-[#942626] hover:to-[#a82d2d] border border-[#d4af37]/70 text-[#ffd700] font-cinzel font-bold text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 shadow-md"
+                  <button
+                    type="button"
+                    onClick={handleScrollToCustomizer}
+                    className="px-2 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#2a1d1b] to-[#3a2724] border border-[#d4af37] text-[#ffd700] font-cinzel font-bold text-[11px] sm:text-xs uppercase tracking-wider active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 shadow-md"
                   >
-                    <span>Order T-Shirt ↗</span>
-                  </a>
+                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ffd700] shrink-0" />
+                    <span className="whitespace-nowrap">Customize</span>
+                  </button>
+
+                  {/* Order Button with Glowing Effect on Mobile */}
+                  <div className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#ffd700] via-[#ea384c] to-[#ffd700] rounded-xl blur-sm opacity-85 animate-pulse pointer-events-none" />
+                    <a
+                      href={ORDER_FORM_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative w-full px-2 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#942626] via-[#b91c1c] to-[#7f1d1d] border border-[#ffd700] text-[#ffd700] font-cinzel font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-[0_0_14px_rgba(255,215,0,0.7)] active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1 text-center"
+                    >
+                      <span className="whitespace-nowrap">Order ↗</span>
+                    </a>
+                  </div>
                 </div>
               </div>
+
             </div>
 
-            {/* ========================================================================= */}
-            {/* STAGE 3: INTERACTIVE 3D T-SHIRT CUSTOMIZER                                */}
-            {/* ========================================================================= */}
-            <div id="tshirt-customizer-section" className="w-full">
+            {/* STAGE 2: INTERACTIVE T-SHIRT CUSTOMIZER (Glassmorphism, No Heavy Outline Box) */}
+            <div id="tshirt-customizer-section" className="w-full pt-4 scroll-mt-20">
               <TShirtCustomizer
                 customName={customName}
                 onNameChange={setCustomName}
@@ -900,12 +991,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Sticky Bottom Bar on Result Screen */}
-      {screen === 'result' && (
-        <StickyCTA
-          customName={customName}
-        />
-      )}
 
       {/* 9:16 Instagram Story Modal */}
       <StoryShareModal

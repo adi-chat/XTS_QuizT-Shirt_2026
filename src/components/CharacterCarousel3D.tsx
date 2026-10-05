@@ -1,22 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { CHARACTERS_CATALOG, ARCHETYPE_METADATA } from '../data/characters';
-import type { CharacterProfile } from '../types/quiz';
+import { CHARACTERS, ARCHETYPE_METADATA } from '../data/characters';
 import { soundManager } from '../utils/audio';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// 10 Curated Characters (1 per Archetype) — preventing spoilers while showing stage diversity
-const SHOWCASE_IDS = [
-  'feluda',           // Mastermind
-  'prince_zuko',      // Dramatic Rebel
-  'ted_lasso',        // Golden Idealist
-  'tony_stark',       // Scene Stealer
-  'terence_fletcher', // Method Purist
-  'levi_ackerman',    // Ghost in the Wings
-  'michael_scott',    // Chaos Engine
-  'draco_malfoy',     // Glamour Icon
-  'peter_parker',     // Reluctant Prodigy
-  'uncle_iroh',       // Production Anchor
-];
+// Pick 10 representative iconic characters (1 per archetype) for the landing showcase
+const showcaseCharacters = [
+  CHARACTERS.find(c => c.id === 'draco_malfoy') || CHARACTERS.find(c => c.archetype === 'glamour_icon')!,
+  CHARACTERS.find(c => c.id === 'levi_ackerman') || CHARACTERS.find(c => c.archetype === 'ghost_in_wings')!,
+  CHARACTERS.find(c => c.id === 'ted_lasso') || CHARACTERS.find(c => c.archetype === 'golden_idealist')!,
+  CHARACTERS.find(c => c.id === 'michael_scott') || CHARACTERS.find(c => c.archetype === 'scene_stealer')!,
+  CHARACTERS.find(c => c.id === 'severus_snape') || CHARACTERS.find(c => c.archetype === 'method_purist')!,
+  CHARACTERS.find(c => c.id === 'light_yagami') || CHARACTERS.find(c => c.archetype === 'mastermind')!,
+  CHARACTERS.find(c => c.id === 'billy_butcher') || CHARACTERS.find(c => c.archetype === 'dramatic_rebel')!,
+  CHARACTERS.find(c => c.id === 'deadpool') || CHARACTERS.find(c => c.archetype === 'chaos_engine')!,
+  CHARACTERS.find(c => c.id === 'peter_parker') || CHARACTERS.find(c => c.archetype === 'reluctant_prodigy')!,
+  CHARACTERS.find(c => c.id === 'gandalf') || CHARACTERS.find(c => c.archetype === 'production_anchor')!,
+].filter(Boolean);
 
 export const CharacterCarousel3D: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -28,14 +27,13 @@ export const CharacterCarousel3D: React.FC = () => {
     return false;
   });
 
-  // Touch & pointer drag state
+  // Touch & pointer drag state (non-blocking for vertical scroll)
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const startYRef = useRef(0);
   const isHorizontalSwipeRef = useRef<boolean | null>(null);
   const currentDragDeltaRef = useRef(0);
 
-  // Resize listener for responsive 3D geometry
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -43,11 +41,6 @@ export const CharacterCarousel3D: React.FC = () => {
     window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Curate the 10 characters
-  const showcaseCharacters: CharacterProfile[] = SHOWCASE_IDS.map(
-    id => CHARACTERS_CATALOG[id]
-  ).filter(Boolean);
 
   const totalCards = showcaseCharacters.length;
 
@@ -68,16 +61,16 @@ export const CharacterCarousel3D: React.FC = () => {
     }
   };
 
-  // Auto-rotation every 3.2s when not hovered or dragged
+  // Auto-rotation every 3.5s when not hovered or dragged
   useEffect(() => {
     if (isHovered) return;
     const interval = setInterval(() => {
       setActiveIndex(prev => (prev + 1) % totalCards);
-    }, 3200);
+    }, 3500);
     return () => clearInterval(interval);
   }, [isHovered, totalCards]);
 
-  // Touch/Drag handlers
+  // Touch/Drag handlers with vertical scroll preservation
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
@@ -95,15 +88,13 @@ export const CharacterCarousel3D: React.FC = () => {
     const deltaX = clientX - startXRef.current;
     const deltaY = clientY - startYRef.current;
 
-    // Discriminate between vertical page scroll and horizontal card swipe
     if (isHorizontalSwipeRef.current === null) {
-      // If user moves vertically first by more than 5px, immediately relinquish touch to browser for native scroll!
+      // If user scrolls vertically, release touch control to the window immediately
       if (Math.abs(deltaY) > 5 && Math.abs(deltaY) > Math.abs(deltaX)) {
         isHorizontalSwipeRef.current = false;
         isDraggingRef.current = false;
         return;
       }
-      // If user moves horizontally first by more than 8px, lock into card swipe
       if (Math.abs(deltaX) > 8 && Math.abs(deltaX) >= Math.abs(deltaY)) {
         isHorizontalSwipeRef.current = true;
       }
@@ -143,40 +134,36 @@ export const CharacterCarousel3D: React.FC = () => {
   // 3D Geometry calculation
   const getCardTransform = (offset: number) => {
     if (isMobile) {
-      // Mobile: Depth-stacked inside 300px frame (Zero horizontal blowout)
       if (offset === 0) {
         return {
           transform: 'translateX(0px) translateZ(25px) rotateY(0deg) scale(1)',
           opacity: 1,
           zIndex: 30,
-          pointerEvents: 'auto' as const,
         };
       }
       if (offset === -1) {
         return {
-          transform: 'translateX(-52px) translateZ(-50px) rotateY(16deg) scale(0.85)',
-          opacity: 0.45,
+          transform: 'translateX(-45px) translateZ(-40px) rotateY(16deg) scale(0.86)',
+          opacity: 0.5,
           zIndex: 10,
-          pointerEvents: 'auto' as const,
         };
       }
       if (offset === 1) {
         return {
-          transform: 'translateX(52px) translateZ(-50px) rotateY(-16deg) scale(0.85)',
-          opacity: 0.45,
+          transform: 'translateX(45px) translateZ(-40px) rotateY(-16deg) scale(0.86)',
+          opacity: 0.5,
           zIndex: 10,
-          pointerEvents: 'auto' as const,
         };
       }
       return {
-        transform: `translateX(${offset * 60}px) translateZ(-140px) scale(0.6)`,
+        transform: `translateX(${offset * 50}px) translateZ(-80px) scale(0.7)`,
         opacity: 0,
         zIndex: 0,
         pointerEvents: 'none' as const,
       };
     }
 
-    // Desktop: Cylindrical 5-card Cover Flow with balanced geometry
+    // Desktop transforms
     if (offset === 0) {
       return {
         transform: 'translateX(0px) translateZ(35px) rotateY(0deg) scale(1.02)',
@@ -231,18 +218,19 @@ export const CharacterCarousel3D: React.FC = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Sneak Peek Header Pill */}
-      <div className="flex items-center gap-1.5 px-3.5 py-1 mb-2 rounded-full bg-[#1b1513]/90 border border-[#d4af37]/60 text-[#ffd700] text-[10px] sm:text-xs uppercase tracking-widest font-cinzel font-bold shadow-lg">
-        <Sparkles className="w-3.5 h-3.5 text-[#ffd700]" />
-        <span>Sneak Peek: 10 Stage Archetypes</span>
+      {/* 10 Stage Archetypes Header (No Pill, No Star, Elegant Glowing Golden Typography) */}
+      <div className="mb-2 text-center">
+        <h2 className="font-cinzel text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-shimmer-gold glow-text-gold drop-shadow-[0_2px_8px_rgba(255,215,0,0.5)]">
+          10 Stage Archetypes
+        </h2>
       </div>
 
-      {/* 3D Perspective Stage */}
+      {/* 3D Perspective Stage of Character Cards */}
       <div
-        className="relative w-full flex items-center justify-center overflow-x-clip py-2 sm:py-4 cursor-grab active:cursor-grabbing"
+        className="relative w-full flex items-center justify-center overflow-x-clip py-2 sm:py-3 cursor-grab active:cursor-grabbing"
         style={{
           perspective: isMobile ? '800px' : '1200px',
-          height: isMobile ? '260px' : '390px',
+          height: isMobile ? '280px' : '385px',
           touchAction: 'pan-y',
         }}
         onTouchStart={handleTouchStart}
@@ -267,7 +255,7 @@ export const CharacterCarousel3D: React.FC = () => {
                 key={char.id}
                 onClick={() => handleSelectCard(index)}
                 className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out will-change-transform ${
-                  isMobile ? 'w-[172px] h-[252px]' : 'w-[255px] h-[375px]'
+                  isMobile ? 'w-[180px] h-[270px]' : 'w-[250px] h-[370px]'
                 } ${
                   isActive
                     ? 'bg-[#191311] border-2 border-[#ffd700] shadow-[0_0_35px_rgba(212,175,55,0.45)] ring-1 ring-[#ffd700]/50'
@@ -290,13 +278,13 @@ export const CharacterCarousel3D: React.FC = () => {
                     loading="lazy"
                   />
                   {/* Subtle theatrical vignette to ensure contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/25 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/20 pointer-events-none" />
                 </div>
 
-                {/* Floating Archetype Badge Pill at Top (Centered, No Act Mention, Zero Truncation) */}
+                {/* Floating Archetype Badge Pill at Top */}
                 <div className="absolute top-2.5 left-2 right-2 flex justify-center pointer-events-none z-10">
                   <span
-                    className="px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[10.5px] font-cinzel font-black tracking-wider uppercase backdrop-blur-md border shadow-lg whitespace-nowrap"
+                    className="px-2.5 py-0.5 rounded-full text-[8.5px] sm:text-[10px] font-cinzel font-black tracking-wider uppercase backdrop-blur-md border shadow-lg whitespace-nowrap"
                     style={{
                       backgroundColor: `${meta?.accentColor || '#d4af37'}35`,
                       borderColor: `${meta?.accentColor || '#d4af37'}99`,
@@ -307,20 +295,20 @@ export const CharacterCarousel3D: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Floating Playbill Details Overlay Pushed Downwards at Bottom (Snug, Zero Wasted Space) */}
+                {/* Floating Playbill Details Overlay Pushed Downwards at Bottom */}
                 <div className="absolute bottom-2 inset-x-2 sm:bottom-3 sm:inset-x-3 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl backdrop-blur-md bg-[#140f0e]/85 border border-[#d4af37]/45 shadow-2xl flex flex-col text-left pointer-events-none z-10">
                   <div className="space-y-0.5">
-                    <h3 className="font-cinzel text-xs sm:text-[15px] font-black text-white leading-tight drop-shadow-sm">
+                    <h3 className="font-cinzel text-xs sm:text-[14px] font-black text-white leading-tight drop-shadow-sm truncate">
                       {char.name}
                     </h3>
-                    <p className="text-[9.5px] sm:text-xs font-cinzel text-[#ffd700] font-bold leading-tight">
+                    <p className="text-[9px] sm:text-[11px] font-cinzel text-[#ffd700] font-bold leading-tight truncate">
                       {char.title}
                     </p>
                   </div>
 
-                  <div className="w-full h-px bg-[#d4af37]/35 my-1 sm:my-1.5" />
+                  <div className="w-full h-px bg-[#d4af37]/35 my-1" />
 
-                  <p className="font-playfair text-[8.5px] sm:text-[11.5px] italic text-[#fce8d5] leading-snug line-clamp-2">
+                  <p className="font-playfair text-[8.5px] sm:text-[11px] italic text-[#fce8d5] leading-snug line-clamp-2">
                     "{char.quote}"
                   </p>
                 </div>
